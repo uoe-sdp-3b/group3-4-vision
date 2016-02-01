@@ -1,14 +1,15 @@
+#!/usr/bin/env python2.7
 import numpy as np
 import cv2
 import glob
 import json
 from copy import copy
+import os
 
 class Configure():
     def __init__(self):
         self.objpoints = []
         self.imgpoints = []
-        #self.camera = cv2.VideoCapture(0)
         self.height = 480
         self.width = 640
 
@@ -17,7 +18,7 @@ class Configure():
         objp = np.zeros((dim[0]*dim[1], 3), np.float32)
         objp[:,:2] = np.mgrid[0:dim[0], 0:dim[1]].T.reshape(-1,2)
         images = glob.glob('samples/pitch0/*.png')
-        #print "images: %s" % images
+
         for fname in images:
             img = cv2.imread(fname)
             gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -37,7 +38,7 @@ class Configure():
                 # Comment this out to skip showing sample images!
                 _ = cv2.drawChessboardCorners(img, dim, corners2, ret)
                 cv2.imshow('img',img)
-       	    cv2.waitKey(1000)
+            cv2.waitKey(1000)
 
         ret, camera_matrix, dist, _, _ = cv2.calibrateCamera(self.objpoints, self.imgpoints, gray.shape[::-1],None,None)
         new_camera_matrix, roi=cv2.getOptimalNewCameraMatrix(camera_matrix, dist,(self.width,self.height),0,(self.width,self.height))
@@ -51,10 +52,14 @@ class Configure():
             'dist' : dist.tolist()}
 
         data = {0 : pitch0, 1: pitch1}
-        
-        with open('undistort.json', 'w') as f:
-            f.write(json.dumps(data))
 
-C = Configure()
-C.getCalibrationParameters()
-            
+        return data
+
+
+
+if __name__ == "__main__":
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../config/", "undistort.json")
+    C = Configure()
+    data = C.getCalibrationParameters()
+    with open(path, 'w') as f:
+        f.write(json.dumps(data))
