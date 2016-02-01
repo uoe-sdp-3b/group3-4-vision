@@ -42,15 +42,13 @@ class Configure():
         ret, camera_matrix, dist, _, _ = cv2.calibrateCamera(self.objpoints, self.imgpoints, gray.shape[::-1],None,None)
         new_camera_matrix, roi=cv2.getOptimalNewCameraMatrix(camera_matrix, dist,(self.width,self.height),0,(self.width,self.height))
 
-        pitch1 = {'new_camera_matrix' : new_camera_matrix,
-            'roi' : roi,
-            'camera_matrix' : camera_matrix,
-            'dist' : dist}
+        pitch1 = {'new_camera_matrix' : new_camera_matrix.tolist(),
+            'camera_matrix' : camera_matrix.tolist(),
+            'dist' : dist.tolist()}
 
-        pitch0 = {'new_camera_matrix' : new_camera_matrix,
-            'roi' : roi,
-            'camera_matrix' : camera_matrix,
-            'dist' : dist}
+        pitch0 = {'new_camera_matrix' : new_camera_matrix.tolist(),
+            'camera_matrix' : camera_matrix.tolist(),
+            'dist' : dist.tolist()}
 
         data = {0 : pitch0, 1: pitch1}
         
