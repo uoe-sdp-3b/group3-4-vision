@@ -42,7 +42,7 @@ for fname in images:
         objpoints.append(objp)
 
         corners2 = copy(corners)
-        cv2.cornerSubPix(gray,corners2,(11,11),(-1,-1),criteria)
+        _ = cv2.cornerSubPix(gray,corners2,(11,11),(-1,-1),criteria)
         imgpoints.append(corners2)
 
         # Draw and display the corners
