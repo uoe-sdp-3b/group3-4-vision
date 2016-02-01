@@ -2,17 +2,21 @@ import numpy as np
 import cv2
 import glob
 import json
+from copy import copy
 
-class Configure(object):
-	def __init__():
+class Configure():
+    def __init__(self):
         self.objpoints = []
         self.imgpoints = []
-        self.camera = cv2.VideoCapture(0)
+        #self.camera = cv2.VideoCapture(0)
         self.height = 480
         self.width = 640
 
-	def getCalibrationParameters(camera):
-		images = glob.glob('samples/pitch0/*.png')
+    def getCalibrationParameters(self):
+        dim = (7,5)
+        objp = np.zeros((dim[0]*dim[1], 3), np.float32)
+        objp[:,:2] = np.mgrid[0:dim[0], 0:dim[1]].T.reshape(-1,2)
+        images = glob.glob('samples/pitch0/*.png')
         #print "images: %s" % images
         for fname in images:
             img = cv2.imread(fname)
@@ -24,10 +28,10 @@ class Configure(object):
             #cv2.waitkey(5)
             # If found, add object points, image points (after refining them)
             if ret == True:
-                objpoints.append(objp)
+                self.objpoints.append(objp)
                 corners2 = copy(corners)
-                _ = cv2.cornerSubPix(gray,corners2,(11,11),(-1,-1),criteria)
-                imgpoints.append(corners2)
+                #_ = cv2.cornerSubPix(gray,corners2,(11,11),(-1,-1),criteria)
+                self.imgpoints.append(corners2)
 
                 # Draw and display the corners
                 # Comment this out to skip showing sample images!
@@ -35,21 +39,24 @@ class Configure(object):
                 cv2.imshow('img',img)
        	    cv2.waitKey(1000)
 
-        ret, camera_matrix, dist, _, _ = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1],None,None)
+        ret, camera_matrix, dist, _, _ = cv2.calibrateCamera(self.objpoints, self.imgpoints, gray.shape[::-1],None,None)
         new_camera_matrix, roi=cv2.getOptimalNewCameraMatrix(camera_matrix, dist,(self.width,self.height),0,(self.width,self.height))
 
-        pitch1 = {'new_camera_matrix' : newcameramtx,
+        pitch1 = {'new_camera_matrix' : new_camera_matrix,
             'roi' : roi,
-            'camera_matrix' : mtx,
+            'camera_matrix' : camera_matrix,
             'dist' : dist}
 
-        pitch0 = {'new_camera_matrix' : newcameramtx,
+        pitch0 = {'new_camera_matrix' : new_camera_matrix,
             'roi' : roi,
-            'camera_matrix' : mtx,
+            'camera_matrix' : camera_matrix,
             'dist' : dist}
 
         data = {0 : pitch0, 1: pitch1}
         
         with open('undistort.json', 'w') as f:
             f.write(json.dumps(data))
+
+C = Configure()
+C.getCalibrationParameters()
             
