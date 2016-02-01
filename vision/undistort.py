@@ -78,8 +78,9 @@ while c != 27:
 
     # rotate image anticlockwise by 2 degrees
     rows,cols = frame.shape[:2]
+    print(frame.shape)
     M = cv2.getRotationMatrix2D((cols/2,rows/2),3,1)
-    frame = cv2.warpAffine(frame,M,(cols,rows))
+    # frame = cv2.warpAffine(frame,M,(cols,rows))
     #frame = cv2.warpPerspective()
 
     #These are the actual values needed to undistort:

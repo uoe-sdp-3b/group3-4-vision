@@ -4,15 +4,19 @@ import util
 import numpy as np
 
 class Calibrate():
+
+    COLS = 640
+    ROWS = 480
+
     def __init__(self):
         pass
 
-    def step(self):
+    def step(self, frame):
         functions = [
+            self.perspective,
+            self.undistort,
             self.warp,
-            self.undistort
             ]
-        frame = cv2.imread("samples/pitch0/10_6x4.png")
 
         return util.compose(*functions)(frame)
 
@@ -38,10 +42,24 @@ class Calibrate():
                             pitch["new_camera_matrix"])
 
     def warp(self, frame):
-        M = cv2.getRotationMatrix2D((640/2, 480/2), 3, 1)
-        return cv2.warpAffine(frame, M, (640, 480))
+        M = cv2.getRotationMatrix2D((self.COLS/2, self.ROWS/2), 3, 1)
+        return cv2.warpAffine(frame, M, (self.COLS, self.ROWS))
+
+    def perspective(self, frame):
+
+        pts1 = np.float32([[-5,0],[15,476],[609,474],[627,5]])
+        pts2 = np.float32([[0,0],[0,475],[640,480],[640,0]])
+
+        M = cv2.getPerspectiveTransform(pts1,pts2)
+
+        dst = cv2.warpPerspective(frame,M,(640,480))
+
+        return dst
 
 
     def fun(self):
-        cv2.imshow("distort", self.step())
-        cv2.waitKey(0)
+        self.show_frame(self.step())
+
+    def show_frame(self, frame):
+        cv2.imshow("distort", frame)
+

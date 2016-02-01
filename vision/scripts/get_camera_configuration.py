@@ -31,7 +31,8 @@ class Configure():
             if ret == True:
                 self.objpoints.append(objp)
                 corners2 = copy(corners)
-                #_ = cv2.cornerSubPix(gray,corners2,(11,11),(-1,-1),criteria)
+                criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+                _ = cv2.cornerSubPix(gray,corners2,(11,11),(-1,-1),criteria)
                 self.imgpoints.append(corners2)
 
                 # Draw and display the corners
