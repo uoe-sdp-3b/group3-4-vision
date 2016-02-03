@@ -18,3 +18,7 @@ class Camera(object):
         """
         status, frame = self.capture.read()
         return frame
+
+
+    def close(self):
+        self.capture.release()
