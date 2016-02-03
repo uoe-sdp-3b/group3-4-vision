@@ -14,6 +14,7 @@ class Calibrate():
     def step(self, frame):
         functions = [
             self.perspective,
+            self.translate,
             self.undistort,
             self.warp,
             ]
@@ -32,6 +33,10 @@ class Calibrate():
             ret[key] = np.asarray(value)
 
         return ret
+
+    def translate(self, frame):
+        M = cv2.float32([[1,0,3],[0,1,0]])
+        return cv2.warpAffine(frame, M, (640,480))
 
     def undistort(self, frame):
         pitches = util.read_json("config/undistort.json")
