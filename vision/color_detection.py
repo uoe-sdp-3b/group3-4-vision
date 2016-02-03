@@ -25,22 +25,39 @@ i = 0
 while(1):
 
 	frame = step(c.get_frame())
+	#frame = cv2.imread('useful.png')
 
 	blur = cv2.GaussianBlur(frame,(19,19), 0)
-	#gray_image = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
 	hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
     # define range of blue color in HSV
 	lower_blue = np.array([90,50,50])
 	upper_blue = np.array([130,255,255])
 
-    # Threshold the HSV image to get only blue colors
 	mask = cv2.inRange(hsv, lower_blue, upper_blue)
+	ret,thresh = cv2.threshold(mask,127,255,0)
+
+	_, contours, _ = cv2.findContours(thresh, 1, 2)
+
+	for i in range(0, len(contours)):
+		cnt = contours[i]
+		M = cv2.moments(cnt)
+
+		if M['m00'] == 0 :
+			continue
+		cx = int(M['m10']/M['m00'])
+		cy = int(M['m01']/M['m00'])
+
+		print "X: "+str(cx)+"   Y: "+str(cy)+"\n"
+		(x,y),radius = cv2.minEnclosingCircle(cnt)
+		center = (int(x),int(y))
+		radius = int(radius)
+		cv2.circle(frame,center,radius,(0,255,0),2)
 
     # Bitwise-AND mask and original image
 	res = cv2.bitwise_and(frame,frame, mask= mask)
 	cv2.imshow('hsv', hsv) 
-	#cv2.imshow('blurred lines', blur)
+	cv2.imshow('blurred lines', blur)
 	cv2.imshow('frame',frame)
 	cv2.imshow('mask',mask)
 	cv2.imshow('res',res)
