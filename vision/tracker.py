@@ -8,11 +8,11 @@ import cv2
 WHITE_LOWER = np.array([1, 0, 100])
 WHITE_HIGHER = np.array([36, 255, 255])
 
-BLUE_LOWER = np.array([90, 50., 50.])
-BLUE_HIGHER = np.array([130, 255., 255.])
+BLUE_LOWER = np.array([70, 50, 50])
+BLUE_HIGHER = np.array([160, 255, 255])
 
-RED_LOWER = np.array([0, 240, 140])
-RED_HIGHER = np.array([9, 255, 255])
+RED_LOWER = np.array([0, 175, 90])
+RED_HIGHER = np.array([230, 255, 255])
 
 YELLOW_LOWER = np.array([9, 50, 50])
 YELLOW_HIGHER = np.array([11, 255, 255])
@@ -25,13 +25,14 @@ def get_ball_coordinates(ballColor):
 	frame = step(c.get_frame())
 	# apply Gaussian blurring to remove noise
 	blur = cv2.GaussianBlur(frame,(19,19), 0)
+
 	# convert RGB color scale into HSV
 	hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
-	# define range of blue color in HSV
-
-	if ballColor == 'red':
+	
+	# define range of ball color in HSV
+	if ballColor == 'RED':
 		mask = cv2.inRange(hsv, RED_LOWER, RED_HIGHER)
-	elif ballColor == 'blue':
+	elif ballColor == 'BLUE':
 		mask = cv2.inRange(hsv, BLUE_LOWER, BLUE_HIGHER)
 
 	ret,thresh = cv2.threshold(mask,127,255,0)
@@ -58,3 +59,14 @@ def get_ball_coordinates(ballColor):
 
 	return center	
 	
+def opponent_defender_coordinates():
+	pass
+
+def opponent_attacker_coordinates():
+	pass
+
+def our_defender_coordinates():
+	pass
+
+def our_attacker_coordinates():
+	pass				
