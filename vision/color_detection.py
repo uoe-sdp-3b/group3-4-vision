@@ -15,8 +15,12 @@ WHITE_HIGHER = np.array([36, 255, 255])
 BLUE_LOWER = np.array([70, 50, 50])
 BLUE_HIGHER = np.array([160, 255, 255])
 
-RED_LOWER = np.array([130, 100, 100]) 
-RED_HIGHER = np.array([180, 255, 255])
+
+PINK_LOWER = np.array([155, 100, 100]) 
+PINK_HIGHER = np.array([175, 255, 255])
+
+RED_LOWER = np.array([0, 110, 100]) 
+RED_HIGHER = np.array([5, 255, 255])
 
 GREEN_LOWER = np.array([50, 110, 110])
 GREEN_HIGHER = np.array([70, 255, 255])
@@ -36,8 +40,9 @@ while(1):
 	blur = cv2.GaussianBlur(frame,(19,19), 0)
 	hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
-	mask = cv2.inRange(hsv, YELLOW_LOWER, YELLOW_HIGHER)
-
+	#mask1 = cv2.inRange(hsv, RED_LOWER1, RED_HIGHER1)
+	mask = cv2.inRange(hsv, RED_LOWER, RED_HIGHER)
+	#mask = cv2.bitwise_and(mask1, mask1, mask2)
 	ret,thresh = cv2.threshold(mask,127,255,0)
 
 	_, contours, _ = cv2.findContours(thresh, 1, 2)
@@ -64,12 +69,13 @@ while(1):
 		cv2.rectangle(frame, (x,y),(x+w,y+h),(0,255,0),2)
 		'''
 		(x,y),radius = cv2.minEnclosingCircle(cnt)
+		print(str(x) + "  :  " + str(y))
 		center = (int(x),int(y))
 		radius = int(radius)
 		cv2.circle(frame,center,radius,(0,255,0),2)
 		
 	
-    # Bitwise-AND mask and original image
+    # Bitwise-AND mask  and original image
 	res = cv2.bitwise_and(frame,frame, mask= mask)
 	cv2.imshow('hsv', hsv) 
 	cv2.imshow('blurred lines', blur)
