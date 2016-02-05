@@ -1,3 +1,5 @@
-# SDP-2016
+# SDP-2016 
+# Team B 
+# Group 3-4
 
-Group members: Dove, Krassy, James, Tom, Karen, and group manager Paul.
+Vision stuff
