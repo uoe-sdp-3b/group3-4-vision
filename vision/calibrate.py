@@ -6,7 +6,7 @@ import numpy as np
 COLS = 640
 ROWS = 480
 pitches = util.read_json("../config/undistort.json")
-
+#pitches = util.read_json("/config/undistort.json")
 
 def step(frame):
     functions = [
