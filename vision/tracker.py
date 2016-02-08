@@ -125,11 +125,11 @@ class Tracker():
     
     @staticmethod
     def transformCoordstoDecartes( (x, y) ):
-        return ( int(x) - 320, - int(y) + 240 )
+        return ( x - 320, -y + 240 )
 
     @staticmethod
     def transformCoordstoCV( (x, y) ) :
-        return ( int(x) + 320, 240 - int(y) )
+        return ( x + 320, 240 - y )
 
 class BallTracker(Tracker):
 
@@ -188,10 +188,13 @@ class RobotTracker(Tracker):
             pink_contour_count = 0
 
             for pink_contour in pink_contours:
-                pink_contour_center, _ = self.get_contour_center(pink_contour)
+                pink_contour_center, radius = self.get_contour_center(pink_contour)
+
+                if radius < 2 or radius > 15:
+                    continue
 
                 dist = self.distance( pink_contour_center, contour_center )
-                if dist < 225 :
+                if dist < 17*17 :
                     pink_contour_count += 1
 
             if pink_contour_count == self.num_pink[position]:
@@ -221,9 +224,14 @@ class RobotTracker(Tracker):
         orientation_midpoint = self.transformCoordstoDecartes(orientation_midpoint)
         center = self.transformCoordstoDecartes( center[0] )
 
-        angle_point = self.getDirectionVector( center, orientation_midpoint )
+        print('Center: ', center)
+        print ('Midpoint', orientation_midpoint)
 
-        angle_radians = np.arctan2( angle_point[1], angle_point[0] )
+        direction_vector = self.getDirectionVector( center, orientation_midpoint )
+
+        print ('Direction Vector:', direction_vector)
+
+        angle_radians = np.arctan2( direction_vector[1], direction_vector[0] )
         angle_degrees = math.degrees(angle_radians)
 
         return angle_degrees
