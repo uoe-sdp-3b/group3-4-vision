@@ -1,14 +1,19 @@
 from camera import Camera
 from calibrate import step
 from matplotlib import pyplot as plt
+from socket import gethostname
 import numpy as np
 import cv2
 from colorsHSV import *
 
 c = Camera()
+# get computer name
+computer_name = gethostname().split('.')[0]
 
 adjustments = {}
-adjustments['blur'] = (19,19) # needs to be parametrized .. TODO
+adjustments['blur'] = (11,11) # needs to be parametrized .. TODO
+
+our_color = 'yellow'
 
 class Tracker():
 
@@ -17,7 +22,7 @@ class Tracker():
         blur_intensity = adjustments['blur']
         blurred_frame = cv2.GaussianBlur(frame, blur_intensity, 0)
         hsv_frame = cv2.cvtColor(blurred_frame, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv_frame, color_range[color][0], color_range[color][1])
+        mask = cv2.inRange(hsv_frame, color_range[(computer_name,color)][0], color_range[(computer_name,color)][1])
 
         _, threshold = cv2.threshold(mask, 127, 255, 0)
         _, contours, _ = cv2.findContours(threshold, 1, 2)

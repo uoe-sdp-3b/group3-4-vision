@@ -1,6 +1,5 @@
 import sys
-sys.path.insert(0, '/afs/inf.ed.ac.uk/user/s12/s1237357/Desktop/group3-4-vision/vision')
-sys.path.insert(0, '/afs/inf.ed.ac.uk/user/s12/s1237357/Desktop/group3-4-vision/vision/config')
+sys.path.insert(0, '../')
 from camera import Camera
 from calibrate import step
 import math
@@ -8,6 +7,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 import cv2
 
+from socket import gethostname
+from colorsHSV import *
+computer_name = gethostname().split('.')[0]
 
 def nothing(x):
     pass
@@ -16,32 +18,32 @@ def nothing(x):
 WHITE_LOWER = np.array([1, 0, 100])
 WHITE_HIGHER = np.array([36, 255, 255])
 
-BLUE_LOWER = np.array([95, 110, 110])
+BLUE_LOWER = np.array([105, 140, 140])
 BLUE_HIGHER = np.array([120, 255, 255])
 
-CYAN_LOWER = np.array([80, 90, 120])
+CYAN_LOWER = np.array([80, 110, 110])
 CYAN_HIGHER = np.array([100, 255, 255])
 
-PINK_LOWER = np.array([140, 110, 110]) 
+PINK_LOWER = np.array([150, 110, 110]) 
 PINK_HIGHER = np.array([175, 255, 255])
 
-RED_LOWER = np.array([0, 170, 170]) 
+RED_LOWER = np.array([0, 190, 190]) 
 RED_HIGHER = np.array([4, 255, 255])
 
-MAROON_LOWER = np.array([176, 170, 170]) 
+MAROON_LOWER = np.array([176, 190, 190]) 
 MAROON_HIGHER = np.array([180, 255, 255])
 
 GREEN_LOWER = np.array([60, 110, 110])
 GREEN_HIGHER = np.array([75, 255, 255])
 
-BRIGHT_GREEN_LOWER = np.array([50, 190, 190])
+BRIGHT_GREEN_LOWER = np.array([50, 170, 170])
 BRIGHT_GREEN_HIGHER = np.array([55, 255, 255])
 
-YELLOW_LOWER = np.array([30, 170, 170])
-YELLOW_HIGHER = np.array([40, 255, 255])
+YELLOW_LOWER = np.array([33, 190, 190])
+YELLOW_HIGHER = np.array([43, 255, 255])
 
 c = Camera()
-num_of_pink_dots = 0;
+num_of_pink_dots = 0
 while(1):
 
 	frame = step(c.get_frame())
@@ -58,8 +60,13 @@ while(1):
 	red_mask = cv2.inRange(hsv, RED_LOWER, RED_HIGHER)
 	maroon_mask = cv2.inRange(hsv, MAROON_LOWER, MAROON_HIGHER)
 	red = cv2.bitwise_or(red_mask, maroon_mask)
+	haha = cv2.bitwise_or(green_mask, cyan_mask)
 	
-	cv2.imshow('blue', blue_mask)
+	cv2.imshow('red', red)
+	cv2.imshow('pink_mask', pink_mask)
+	cv2.imshow('green_mask', green_mask)
+	cv2.imshow('pink_mask', pink_mask)
+	cv2.imshow('cyan_mask', cyan_mask)
 
 	yellow_ret, yellow_thresh = cv2.threshold(yellow_mask,127,255,cv2.THRESH_BINARY)
 	pink_ret, pink_thresh = cv2.threshold(pink_mask,127,255,cv2.THRESH_BINARY)
@@ -92,7 +99,7 @@ while(1):
 
 		center = (int(x),int(y))
 		radius = int(radius)
-		if radius >= 2:
+		if radius >= 3:
 			cv2.circle(frame,center,radius,(0,0,255),2)
 
 	for i in range(0, len(blue_contours)):
@@ -188,31 +195,35 @@ while(1):
 		cv2.rectangle(frame, (x-10,y-10),(x+w+5,y+h+5),(0,255,0),2)
 		'''
 		num_of_pink = 0
+		num_of_green = 0
 		(x,y),radius = cv2.minEnclosingCircle(cnt)
 
 		for i in range(0, len(pink_balls)):
-			if (math.sqrt(((x-pink_balls[i][0])**2)+(y-pink_balls[i][1])**2) < 15):
+			if (math.sqrt(((x-pink_balls[i][0])**2)+(y-pink_balls[i][1])**2) < 17):
 				num_of_pink += 1
+		for i in range(0, len(green_balls)):
+			if (math.sqrt(((x-green_balls[i][0])**2)+(y-green_balls[i][1])**2) < 17):
+				num_of_green += 1		
 
 		center = (int(x),int(y))
 		radius = int(radius)
-		if num_of_pink == 3:
+		if num_of_pink > 1 and num_of_green < 2:
 			cv2.putText(frame,'OUR',(center[0]-15, center[1]+30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, 90)
 			cv2.putText(frame,'DEFENDER',(center[0]-30, center[1]+40), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, 90)
-		if num_of_pink == 1:
+		if num_of_pink < 2 and num_of_green > 1:
 			cv2.putText(frame,'OUR',(center[0]-15, center[1]+30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, 220)
 			cv2.putText(frame,'ATTACKER',(center[0]-30, center[1]+40), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, 220)
 		if radius >= 2:	
-			cv2.circle(frame,center,radius,(0,255,255),2)	
+			cv2.circle(frame,center,20,(90,0,0),2)	
 
 	
-	cv2.circle(frame,(320,240),5,(255,255,255),2)	
+	cv2.circle(frame,(320,240),5,(0,0,0),2)	
     # Bitwise-AND mask  and original image
 	#res = cv2.bitwise_and(frame,frame, mask= mask)
-	cv2.imshow('hsv', hsv) 
-	cv2.imshow('blurred lines', blur)
+	#cv2.imshow('hsv', hsv) 
+	#cv2.imshow('blurred lines', blur)
 	cv2.imshow('frame',frame)
-	cv2.imwrite('transform.png', frame)
+	#cv2.imwrite('transform.png', frame)
 	#cv2.imwrite('b.png', frame)
 	#cv2.imshow('mask',mask)
 	#cv2.imshow('res',res)
