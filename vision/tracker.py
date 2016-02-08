@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 from socket import gethostname
 import numpy as np
 import cv2
+import math
 from colorsHSV import *
 
 c = Camera()
@@ -42,6 +43,20 @@ class Tracker():
 
         return [ self.get_contour_center(x) for x in contours ]
 
+    def getK_furthest_contours(self, k, p, contours):
+
+        distances = [ self.distance( p, self.get_contour_center(c) ) for c in contours]
+        distances_sorted = np.argsort(distances)
+
+        return [ contours[x] for x in distances_sorted[-k:]]
+
+    def getK_closest_contours(self, k, p, contours):#
+
+        distances = [ self.distance( p, self.get_contour_center(c) ) for c in contours]
+        distances_sorted = np.argsort(distances)
+
+        return [ contours[x] for x in distances_sorted[k:]]
+
 
     # Gives us the contour with the biggest area from a list of contours
     def get_biggest_contour(self, contours):
@@ -66,6 +81,42 @@ class Tracker():
 
         return dx * dx + dy * dy 
 
+    def average_point(self, points):
+
+        tx = 0.0
+        ty = 0.0
+
+        for point in points:
+            tx += point[0]
+            ty += point[1]
+
+        l = len(points)
+
+        return ( tx / l, ty / l )
+
+    def getDirectionVector( center, orientation_p ):
+
+        (cx, cy) = center
+        (ox, oy) = orientation_p
+
+        t = 10
+
+        if ox < cx:
+            t = -t
+
+        k = (cy - oy) / (cx - ox)
+
+        dv = (1, k)
+
+        return [t * x for x in dv ]
+    
+    @staticmethod
+    def transformCoordstoDecartes( (x, y) ):
+        return (x - 320, -y + 240)
+
+    @staticmethod
+    def transformCoordstoCV( (x, y) ) :
+        return (x + 320, 240 - y)
 
 class BallTracker(Tracker):
 
@@ -80,7 +131,6 @@ class BallTracker(Tracker):
         ball_contour = self.get_biggest_contour(contours)
 
         return self.get_contour_center(ball_contour)
-
 
     # Prints the circle around the ball onto the frame
     def show_ball_frame(self, frame):
@@ -135,6 +185,33 @@ class RobotTracker(Tracker):
                 return contour_center, radius
 
         return None
+
+    def get_robot_orientation(self, frame, side, position):
+
+        center = get_robot_coordinates(frame, side, position)
+
+        if self.num_pink[position] == 3:
+            orientation_color = 'pink'
+        else:
+            orientation_color = 'green'
+
+        orientation_contours = self.get_contours(frame, orientation_color, self.adjustments)
+
+        orientation_contours = self.getK_closest_contours(3, center, orientation_contours)
+        orientation_contours = self.getK_furthest_contours(2, center, orientation_contours)
+
+        orientation_centers = self.get_contour_centers(orientation_contours)
+
+        orientation_midpoint = self.average_point(orientation_centers)
+        orientation_midpoint = transformCoordstoDecartes(orientation_midpoint)
+        center = transformCoordstoDecartes( center )
+
+        angle_point = self.getDirectionVector( center, orientation_midpoint )
+
+        angle_radians = np.arctan2( angle_point[1], angle_point[0] )
+        angle_degrees = math.degrees(angle_radians)
+
+        return angle_degrees
 
 
     def opponent_defender_coordinates(self, frame):
