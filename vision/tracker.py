@@ -157,7 +157,7 @@ class RobotTracker(Tracker):
         self.num_pink = {}
         self.num_pink['attacker'] = attacker_pink
         self.num_pink['defender'] = 4 - attacker_pink
-
+ 
 
     # Gets the coordinates of the robot on a particular SIDE (us or opponent) and for a particular POSITION (attacker or defender)
     def get_robot_coordinates(self, frame, side, position):
