@@ -14,8 +14,6 @@ computer_name = gethostname().split('.')[0]
 adjustments = {}
 adjustments['blur'] = (11,11) # needs to be parametrized .. TODO
 
-our_color = 'yellow'
-
 class Tracker():
 
     def get_contours(self, frame, color, adjustments):
@@ -23,7 +21,12 @@ class Tracker():
         blur_intensity = adjustments['blur']
         blurred_frame = cv2.GaussianBlur(frame, blur_intensity, 0)
         hsv_frame = cv2.cvtColor(blurred_frame, cv2.COLOR_BGR2HSV)
-        mask = cv2.inRange(hsv_frame, color_range[(computer_name,color)][0], color_range[(computer_name,color)][1])
+        if color == 'red':
+            red_mask = cv2.inRange(hsv_frame, color_range[(computer_name,'red')][0], color_range[(computer_name,'red')][1])
+            maroon_mask = cv2.inRange(hsv_frame, color_range[(computer_name,'maroon')][0], color_range[(computer_name,'maroon')][1])
+            mask = cv2.bitwise_or(red_mask, maroon_mask)
+        else:    
+            mask = cv2.inRange(hsv_frame, color_range[(computer_name,color)][0], color_range[(computer_name,color)][1])
 
         _, threshold = cv2.threshold(mask, 127, 255, 0)
         _, contours, _ = cv2.findContours(threshold, 1, 2)
@@ -34,6 +37,7 @@ class Tracker():
     def get_contour_center(self, contour):
 
         (cx, cy), radius = cv2.minEnclosingCircle(contour)
+        #print radius
 
         return ( int(cx), int(cy) ), int(radius)
 
@@ -44,18 +48,24 @@ class Tracker():
         return [ self.get_contour_center(x) for x in contours ]
 
     def getK_furthest_contours(self, k, p, contours):
-
-        distances = [ self.distance( p, self.get_contour_center(c) ) for c in contours]
+        ##print len(contours)
+        ##print contours
+        distances = [ self.distance( p[0], self.get_contour_center(c)[0] ) for c in contours]
         distances_sorted = np.argsort(distances)
-
+        ##print distances
+        ##print distances_sorted
         return [ contours[x] for x in distances_sorted[-k:]]
 
     def getK_closest_contours(self, k, p, contours):#
 
-        distances = [ self.distance( p, self.get_contour_center(c) ) for c in contours]
+        distances = [ self.distance( p[0], self.get_contour_center(c)[0] ) for c in contours]
+        #print 80 * "="
+        #print distances
         distances_sorted = np.argsort(distances)
-
-        return [ contours[x] for x in distances_sorted[k:]]
+        #print 80 * "="
+        #print distances_sorted
+        #print [ contours[x] for x in distances_sorted[:k]]
+        return [ contours[x] for x in distances_sorted[:k]]
 
 
     # Gives us the contour with the biggest area from a list of contours
@@ -63,6 +73,9 @@ class Tracker():
 
         max_area = -1
         max_contour_position = -1
+
+        if len(contours) == 0:
+            return None
 
         for i in range(0, len(contours)):
             area = cv2.contourArea(contours[i])
@@ -87,14 +100,14 @@ class Tracker():
         ty = 0.0
 
         for point in points:
-            tx += point[0]
-            ty += point[1]
+            tx += point[0][0]
+            ty += point[0][1]
 
         l = len(points)
 
         return ( tx / l, ty / l )
 
-    def getDirectionVector( center, orientation_p ):
+    def getDirectionVector( self, center, orientation_p ):
 
         (cx, cy) = center
         (ox, oy) = orientation_p
@@ -112,11 +125,11 @@ class Tracker():
     
     @staticmethod
     def transformCoordstoDecartes( (x, y) ):
-        return (x - 320, -y + 240)
+        return ( int(x) - 320, - int(y) + 240 )
 
     @staticmethod
     def transformCoordstoCV( (x, y) ) :
-        return (x + 320, 240 - y)
+        return ( int(x) + 320, 240 - int(y) )
 
 class BallTracker(Tracker):
 
@@ -132,7 +145,7 @@ class BallTracker(Tracker):
 
         return self.get_contour_center(ball_contour)
 
-    # Prints the circle around the ball onto the frame
+    ## Prints the circle around the ball onto the frame
     def show_ball_frame(self, frame):
 
         center, radius = self.get_ball_coordinates(frame)
@@ -165,11 +178,11 @@ class RobotTracker(Tracker):
         possible_opponent_contours = self.get_contours(frame, self.side_colors[side], adjustments)
         pink_contours = self.get_contours(frame, 'pink', adjustments)
 
-        '''print self.get_contour_centers(pink_contours)
-        print ('---------------')
-        print self.get_contour_centers(possible_opponent_contours)'''
+        #'''print self.get_contour_centers(pink_contours)
+        #print ('---------------')
+        #print self.get_contour_centers(possible_opponent_contours)'''
 
-        #print len(pink_contours)
+        ##print len(pink_contours)
         for contour in possible_opponent_contours:
             contour_center, radius = self.get_contour_center(contour)
             pink_contour_count = 0
@@ -188,23 +201,25 @@ class RobotTracker(Tracker):
 
     def get_robot_orientation(self, frame, side, position):
 
-        center = get_robot_coordinates(frame, side, position)
+        center = self.get_robot_coordinates(frame, side, position)
 
         if self.num_pink[position] == 3:
             orientation_color = 'pink'
         else:
-            orientation_color = 'green'
+            orientation_color = 'bright_green'
 
-        orientation_contours = self.get_contours(frame, orientation_color, self.adjustments)
-
+        orientation_contours = self.get_contours(frame, orientation_color, adjustments)
+        print len(orientation_contours)
         orientation_contours = self.getK_closest_contours(3, center, orientation_contours)
+
         orientation_contours = self.getK_furthest_contours(2, center, orientation_contours)
+
 
         orientation_centers = self.get_contour_centers(orientation_contours)
 
         orientation_midpoint = self.average_point(orientation_centers)
-        orientation_midpoint = transformCoordstoDecartes(orientation_midpoint)
-        center = transformCoordstoDecartes( center )
+        orientation_midpoint = self.transformCoordstoDecartes(orientation_midpoint)
+        center = self.transformCoordstoDecartes( center[0] )
 
         angle_point = self.getDirectionVector( center, orientation_midpoint )
 

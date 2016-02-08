@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from calibrate import *
 from socket import gethostname
 
 computer_name = gethostname().split('.')[0]
@@ -56,6 +57,7 @@ class Camera(object):
         Returns the frame if available, otherwise returns None.
         """
         status, frame = self.capture.read()
+        frame = step(frame)
         return frame
 
 

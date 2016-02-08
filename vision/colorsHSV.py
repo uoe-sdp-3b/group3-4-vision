@@ -42,5 +42,5 @@ color_range[('amble','pink')] = ( np.array([140, 110, 110]), np.array([175, 255,
 color_range[('amble','red')] = ( np.array([0, 190, 190]), np.array([4, 255, 255]) )
 color_range[('amble','maroon')] = ( np.array([176, 190, 190]), np.array([180, 255, 255]) )
 color_range[('amble','green')] = ( np.array([60, 110, 110]), np.array([75, 255, 255]) )
-color_range[('amble','bright_green')] = ( np.array([50, 190, 190]), np.array([55, 255, 255]) )
+color_range[('amble','bright_green')] = ( np.array([45, 180, 180]), np.array([55, 255, 255]) )
 color_range[('amble','yellow')] = ( np.array([30, 140, 140]), np.array([35, 255, 255]) )

@@ -52,13 +52,13 @@ while(1):
 
 	hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
 
-	yellow_mask = cv2.inRange(hsv, YELLOW_LOWER, YELLOW_HIGHER)
-	pink_mask = cv2.inRange(hsv, PINK_LOWER, PINK_HIGHER)
-	green_mask = cv2.inRange(hsv, BRIGHT_GREEN_LOWER, BRIGHT_GREEN_HIGHER)
-	cyan_mask = cv2.inRange(hsv, CYAN_LOWER, CYAN_HIGHER)
-	blue_mask = cv2.inRange(hsv, BLUE_LOWER, BLUE_HIGHER)
-	red_mask = cv2.inRange(hsv, RED_LOWER, RED_HIGHER)
-	maroon_mask = cv2.inRange(hsv, MAROON_LOWER, MAROON_HIGHER)
+	yellow_mask = cv2.inRange(hsv, color_range[(computer_name, 'yellow')][0], color_range[(computer_name, 'yellow')][1])
+	pink_mask = cv2.inRange(hsv, color_range[(computer_name, 'pink')][0], color_range[(computer_name, 'pink')][1])
+	green_mask = cv2.inRange(hsv, color_range[(computer_name, 'bright_green')][0], color_range[(computer_name, 'bright_green')][1])
+	cyan_mask = cv2.inRange(hsv, color_range[(computer_name, 'bright_blue')][0], color_range[(computer_name, 'bright_blue')][1])
+	blue_mask = cv2.inRange(hsv, color_range[(computer_name, 'blue')][0], color_range[(computer_name, 'blue')][1])
+	red_mask = cv2.inRange(hsv, color_range[(computer_name, 'red')][0], color_range[(computer_name, 'red')][1])
+	maroon_mask = cv2.inRange(hsv, color_range[(computer_name, 'maroon')][0], color_range[(computer_name, 'maroon')][1])
 	red = cv2.bitwise_or(red_mask, maroon_mask)
 	haha = cv2.bitwise_or(green_mask, cyan_mask)
 	
@@ -67,6 +67,8 @@ while(1):
 	cv2.imshow('green_mask', green_mask)
 	cv2.imshow('pink_mask', pink_mask)
 	cv2.imshow('cyan_mask', cyan_mask)
+	cv2.imshow('blue_mask', blue_mask)
+	cv2.imshow('yellow_mask', yellow_mask)
 
 	yellow_ret, yellow_thresh = cv2.threshold(yellow_mask,127,255,cv2.THRESH_BINARY)
 	pink_ret, pink_thresh = cv2.threshold(pink_mask,127,255,cv2.THRESH_BINARY)
@@ -83,6 +85,7 @@ while(1):
 	_, red_contours, _ = cv2.findContours(red_thresh, 1, 2)
 	_, blue_contours, _ = cv2.findContours(blue_thresh, 1, 2)
 	
+	print len(green_contours)
 	pink_balls = []
 	green_balls = []
 	for i in range(0, len(red_contours)):
@@ -99,8 +102,8 @@ while(1):
 
 		center = (int(x),int(y))
 		radius = int(radius)
-		if radius >= 3:
-			cv2.circle(frame,center,radius,(0,0,255),2)
+		if radius >= 2:
+			cv2.circle(frame,center,7,(0,0,255),2)
 
 	for i in range(0, len(blue_contours)):
 		cnt = blue_contours[i]
