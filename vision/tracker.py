@@ -9,7 +9,8 @@ from colorsHSV import *
 
 c = Camera()
 # get computer name
-computer_name = gethostname().split('.')[0]
+#computer_name = gethostname().split('.')[0]
+computer_name = 'amble'
 
 adjustments = {}
 adjustments['blur'] = (11,11) # needs to be parametrized .. TODO
@@ -112,16 +113,22 @@ class Tracker():
         (cx, cy) = center
         (ox, oy) = orientation_p
 
-        t = 10
-
-        if ox < cx:
-            t = -t
-
         k = (cy - oy) / (cx - ox)
+
+        t  = 10
+
+        if ox > cx :
+            t = -10
 
         dv = (1, k)
 
-        return [t * x for x in dv ]
+        return [ t * x for x in dv ]
+
+    def rotateVector( self, (x, y), angle ):
+        x_new = x * math.cos(angle) - y * math.sin(angle)
+        y_new = x * math.sin(angle) + y * math.cos(angle)
+
+        return [x_new, y_new]
     
     @staticmethod
     def transformCoordstoDecartes( (x, y) ):
@@ -208,31 +215,29 @@ class RobotTracker(Tracker):
 
         if self.num_pink[position] == 3:
             orientation_color = 'pink'
+            pass
         else:
             orientation_color = 'bright_green'
 
-        orientation_contours = self.get_contours(frame, orientation_color, adjustments)
-        print len(orientation_contours)
-        orientation_contours = self.getK_closest_contours(3, center, orientation_contours)
+            orientation_contours_pink = self.get_contours(frame, 'pink', adjustments)
+            orientation_contours_green = self.get_contours(frame, 'bright_green', adjustments)
 
-        orientation_contours = self.getK_furthest_contours(2, center, orientation_contours)
+            pink_center = self.get_contour_center(orientation_contours_pink[0])
 
+            center = self.transformCoordstoDecartes( pink_center[0] )
 
-        orientation_centers = self.get_contour_centers(orientation_contours)
+            closest_green = self.getK_closest_contours(1, center, orientation_contours_green)
+            green_center = self.get_contour_center(closest_green)
+            green_center = self.transformCoordstoDecartes( green_center[0] )
+            midpoint = average_point(center, green_center)
 
-        orientation_midpoint = self.average_point(orientation_centers)
-        orientation_midpoint = self.transformCoordstoDecartes(orientation_midpoint)
-        center = self.transformCoordstoDecartes( center[0] )
+            direction_vector = self.getDirectionVector( center, midpoint )
+            #direction_vector = self.rotateVector( direction_vector, math.radians(205) )
 
-        print('Center: ', center)
-        print ('Midpoint', orientation_midpoint)
+            print ('Direction Vector:', direction_vector)
 
-        direction_vector = self.getDirectionVector( center, orientation_midpoint )
-
-        print ('Direction Vector:', direction_vector)
-
-        angle_radians = np.arctan2( direction_vector[1], direction_vector[0] )
-        angle_degrees = math.degrees(angle_radians)
+            angle_radians = np.arctan2( direction_vector[1], direction_vector[0] )
+            angle_degrees = math.degrees(angle_radians)
 
         return angle_degrees
 
