@@ -26,8 +26,8 @@ color_range[('kilmore','pink')] = ( np.array([140, 110, 110]), np.array([175, 25
 color_range[('kilmore','red')] = ( np.array([0, 170, 170]), np.array([4, 255, 255]) )
 color_range[('kilmore','maroon')] = ( np.array([176, 170, 170]), np.array([180, 255, 255]) )
 color_range[('kilmore','green')] = ( np.array([50, 190, 190]), np.array([55, 255, 255]) )
-color_range[('kilmore','bright_green')] = ( np.array([60, 110, 110]), np.array([75, 255, 255]) )
-color_range[('kilmore','yellow')] = ( np.array([25, 160, 160]), np.array([38, 255, 255]) )
+color_range[('kilmore','bright_green')] = ( np.array([60, 100, 100]), np.array([75, 255, 255]) )
+color_range[('kilmore','yellow')] = ( np.array([25, 150, 150]), np.array([40, 255, 255]) )
 
 
 

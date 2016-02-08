@@ -1,5 +1,6 @@
 from tracker import *
 from camera import Camera
+from tracker import *
 
 c = Camera()
 
@@ -35,8 +36,8 @@ while True:
 	frame = cv2.circle(frame, ( int(center[0]), int(center[1])), 20, (0,0,0), 2)
 	print "center: " + str(center)
 	x, y = Tracker.transformCoordstoDecartes(center)
-	vector1 = (x+v1[0] * 5, y+v1[1] * 5)
-	vector2 = (x+v2[0]* 5, y+v2[1] * 5)
+	vector1 = (x+v1[0], y+v1[1])
+	vector2 = (x+v2[0], y+v2[1])
 	x1, y1 = Tracker.transformCoordstoCV(vector1)
 	x2, y2 = Tracker.transformCoordstoCV(vector2)
 	#print x,y

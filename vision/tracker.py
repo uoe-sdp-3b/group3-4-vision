@@ -7,10 +7,8 @@ import cv2
 import math
 from colorsHSV import *
 
-c = Camera()
 # get computer name
-#computer_name = gethostname().split('.')[0]
-computer_name = 'amble'
+computer_name = gethostname().split('.')[0]
 
 adjustments = {}
 adjustments['blur'] = (11,11) # needs to be parametrized .. TODO
