@@ -46,7 +46,7 @@ c = Camera()
 num_of_pink_dots = 0
 while(1):
 
-	frame = step(c.get_frame())
+	frame = c.get_frame()
 
 	blur = cv2.GaussianBlur(frame,(11,11), 0)
 

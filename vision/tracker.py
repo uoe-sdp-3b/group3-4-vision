@@ -40,7 +40,7 @@ class Tracker():
         (cx, cy), radius = cv2.minEnclosingCircle(contour)
         #print radius
 
-        return ( int(cx), int(cy) ), int(radius)
+        return ( cx, cy ), radius
 
 
     # Extracts the centers of a list of contours
@@ -101,8 +101,8 @@ class Tracker():
         ty = 0.0
 
         for point in points:
-            tx += point[0][0]
-            ty += point[0][1]
+            tx += point[0]
+            ty += point[1]
 
         l = len(points)
 
@@ -117,7 +117,7 @@ class Tracker():
 
         t  = 10
 
-        if ox > cx :
+        if ox < cx :
             t = -10
 
         dv = (1, k)
@@ -189,11 +189,13 @@ class RobotTracker(Tracker):
         #print ('---------------')
         #print self.get_contour_centers(possible_opponent_contours)'''
 
-        ##print len(pink_contours)
+        print len(possible_opponent_contours)
+
         for contour in possible_opponent_contours:
             contour_center, radius = self.get_contour_center(contour)
             pink_contour_count = 0
-
+            if radius < 2 or radius > 15:
+                continue
             for pink_contour in pink_contours:
                 pink_contour_center, radius = self.get_contour_center(pink_contour)
 
@@ -201,8 +203,9 @@ class RobotTracker(Tracker):
                     continue
 
                 dist = self.distance( pink_contour_center, contour_center )
-                if dist < 17*17 :
+                if dist < 20*20 :
                     pink_contour_count += 1
+            print("Pink: ", pink_contour_count)
 
             if pink_contour_count == self.num_pink[position]:
                 return contour_center, radius
@@ -220,26 +223,33 @@ class RobotTracker(Tracker):
             orientation_color = 'bright_green'
 
             orientation_contours_pink = self.get_contours(frame, 'pink', adjustments)
-            orientation_contours_green = self.get_contours(frame, 'bright_green', adjustments)
+            #orientation_contours_green = self.get_contours(frame, 'bright_green', adjustments)
 
-            pink_center = self.get_contour_center(orientation_contours_pink[0])
+            pink_contour = self.getK_closest_contours(1, center, orientation_contours_pink)
 
-            center = self.transformCoordstoDecartes( pink_center[0] )
 
-            closest_green = self.getK_closest_contours(1, center, orientation_contours_green)
-            green_center = self.get_contour_center(closest_green)
-            green_center = self.transformCoordstoDecartes( green_center[0] )
-            midpoint = average_point(center, green_center)
+            pink_center = self.get_contour_center(pink_contour[0])
 
-            direction_vector = self.getDirectionVector( center, midpoint )
-            #direction_vector = self.rotateVector( direction_vector, math.radians(205) )
+            center = self.transformCoordstoDecartes(center[0])
 
-            print ('Direction Vector:', direction_vector)
+            #closest_green = self.getK_closest_contours(1, pink_center, orientation_contours_green)
+            pink_center = self.transformCoordstoDecartes( pink_center[0] )
+            #green_center = self.get_contour_center(closest_green[0])
+            #green_center = self.transformCoordstoDecartes( green_center[0] )
+            #midpoint = self.average_point( [pink_center, green_center] )
 
-            angle_radians = np.arctan2( direction_vector[1], direction_vector[0] )
+            #print("Center: ", center)
+            #print("Midpoint", midpoint)
+            direction_vector1 = self.getDirectionVector( center, pink_center )
+            direction_vector2 = self.rotateVector( direction_vector1, math.radians(205) )
+            
+            print ('Direction Vector1:', direction_vector1)
+            print ('Direction Vector2:', direction_vector2)
+
+            angle_radians = np.arctan2( direction_vector2[1], direction_vector2[0] )
             angle_degrees = math.degrees(angle_radians)
 
-        return angle_degrees
+        return angle_degrees, direction_vector1, direction_vector2
 
 
     def opponent_defender_coordinates(self, frame):

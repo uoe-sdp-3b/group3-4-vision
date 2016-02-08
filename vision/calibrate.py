@@ -1,4 +1,7 @@
 #!/usr/bin/env python2.7
+import sys
+sys.path.insert(0, '../')
+sys.path.insert(0, './')
 import cv2
 import util
 import numpy as np
