@@ -59,7 +59,7 @@ class Configure():
 
 
 if __name__ == "__main__":
-    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../config/", "undistort_pitch0.json")
+    path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "../config/", "undistort_pitch1.json")
     C = Configure()
     data = C.getCalibrationParameters()
     with open(path, 'w') as f:
