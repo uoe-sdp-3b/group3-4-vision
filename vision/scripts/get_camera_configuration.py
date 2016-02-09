@@ -17,7 +17,7 @@ class Configure():
         dim = (8,5)
         objp = np.zeros((dim[0]*dim[1], 3), np.float32)
         objp[:,:2] = np.mgrid[0:dim[0], 0:dim[1]].T.reshape(-1,2)
-        images = glob.glob('../samples/pitch0/*.png')
+        images = glob.glob('../samples/pitch1/*.png')
 
         for fname in images:
             img = cv2.imread(fname)
