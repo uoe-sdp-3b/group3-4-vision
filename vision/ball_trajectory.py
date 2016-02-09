@@ -3,18 +3,6 @@ from camera import Camera
 import numpy as np
 from numpy.linalg import inv
 
-c = Camera()
-
-t = BallTracker('red')
-
-frame = c.get_frame()
-ballpos = t.getBallCoordinates(frame)
-print ballpos
-ballpos = Tracker.transformCoordsToDecartes(ballpos)
-
-previous_positions =  np.array( [ ballpos ] )
-
-k = 20
 
 def meanPoint(points):
 
@@ -71,6 +59,18 @@ def round_point( (x, y) ):
 def add_points( (x1, y1), (x2, y2) ):
     return ( x1 + x2, y1 + y2 )
 
+c = Camera()
+
+t = BallTracker('red')
+ballpos = None
+while ballpos is None:
+    frame = c.get_frame()
+    ballpos = t.getBallCoordinates(frame)
+ballpos = Tracker.transformCoordsToDecartes(ballpos)
+
+previous_positions =  np.array( [ ballpos ] )
+
+k = 20
 while True:
 
     frame = c.get_frame()

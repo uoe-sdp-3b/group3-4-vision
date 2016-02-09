@@ -166,7 +166,7 @@ class BallTracker(Tracker):
 
 class RobotTracker(Tracker):
 
-    def __init__(self, our_color='yellow', num_of_pink = 1):
+    def __init__(self, our_color='yellow', attacker_pink = 1):
 
         self.side_colors = {}
         if (our_color == 'yellow'):
@@ -177,12 +177,8 @@ class RobotTracker(Tracker):
             self.side_colors['opponent'] = 'yellow'
 
         self.num_pink = {}
-        if num_of_pink == 1:
-            self.num_pink['pink_robot'] = 4 - num_of_pink
-            self.num_pink['green_robot'] = num_of_pink
-        else:    
-            self.num_pink['pink_robot'] = num_of_pink
-            self.num_pink['green_robot'] = 4 - num_of_pink
+        self.num_pink['attacker'] = attacker_pink
+        self.num_pink['defender'] = 4 - attacker_pink
  
 
     # Gets the coordinates of the robot on a particular SIDE (us or opponent) and for a particular POSITION (attacker or defender)
@@ -214,7 +210,7 @@ class RobotTracker(Tracker):
 
         center = self.getRobotCoordinates(frame, side, position)
         if center is None:
-            return None, None
+            return None
 
         if self.num_pink[position] == 3:
 
@@ -222,17 +218,17 @@ class RobotTracker(Tracker):
             pink_contours = self.getContours(frame, 'pink', adjustments)
 
             if green_contours == []:
-                return None, None
+                return None
 
             #print center
             orientation_green = self.getKClosestContours(1, center, green_contours)
 
             green_center = self.getContourCenter(orientation_green[0])
 
-            orientation_pink = self.getKClosestContours(3, green_center, pink_contours)
-            orientation_pink = self.getKFurthestContours(2, green_center, orientation_pink)
+            orientation_pink = self.getKClosestContours(3, center, pink_contours)
+            orientation_pink = self.getKFurthestContours(2, center, orientation_pink)
             if len(orientation_pink) != 2:
-                return None, None
+                return None
 
             pink_centers = self.getContourCenters(orientation_pink)
             mean_pink_point = self.meanPoint(pink_centers)
@@ -250,7 +246,7 @@ class RobotTracker(Tracker):
             orientation_pink = self.getKClosestContours(1, center, pink_contours)
 
             if orientation_pink == []:
-                return None, None
+                return None
 
             pink_center = self.getContourCenter(orientation_pink[0])
 
@@ -258,29 +254,29 @@ class RobotTracker(Tracker):
             pink_center = self.transformCoordstoDecartes( pink_center )
 
             direction_vector = self.getDirectionVector( center, pink_center )
-            direction_vector = self.rotateVector( direction_vector, math.radians(215) )
+            direction_vector = self.rotateVector( direction_vector, math.radians(220) )
 
             angle_radians = np.arctan2( direction_vector[1], direction_vector[0] )
             angle_degrees = math.degrees(angle_radians)
 
-        return (angle_degrees, direction_vector), center
+        return angle_degrees, direction_vector
 
 
-    def opponent_green_coordinates(self, frame):
+    def opponent_defender_coordinates(self, frame):
         
-        return self.getRobotCoordinates(frame, 'opponent', 'green_robot')
+        return self.getRobotCoordinates(frame, 'opponent', 'defender')
 
 
-    def opponent_pink_coordinates(self, frame):
+    def opponent_attacker_coordinates(self, frame):
         
-        return self.getRobotCoordinates(frame, 'opponent', 'pink_robot')
+        return self.getRobotCoordinates(frame, 'opponent', 'attacker')
 
 
-    def our_green_coordinates(self, frame):
+    def our_defender_coordinates(self, frame):
         
-        return self.getRobotCoordinates(frame, 'us', 'green_robot')
+        return self.getRobotCoordinates(frame, 'us', 'defender')
 
 
-    def our_pink_coordinates(self, frame):
+    def our_attacker_coordinates(self, frame):
         
-        return self.getRobotCoordinates(frame, 'us', 'pink_robot')   
+        return self.getRobotCoordinates(frame, 'us', 'attacker')   
