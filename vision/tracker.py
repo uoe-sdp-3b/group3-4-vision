@@ -31,14 +31,14 @@ class Tracker():
         _, threshold = cv2.threshold(mask, 127, 255, 0)
         _, contours, _ = cv2.findContours(threshold, 1, 2)
 
-        return removeUselessContours(contours)
+        return self.removeUselessContours(contours)
 
     def removeUselessContours( self, contours ) :
 
         real_contours = []
         for contour in contours:
             _, radius = cv2.minEnclosingCircle(contour)
-            if radius > 2 and radius < 15:
+            if radius > 1.3 and radius < 20:
                 real_contours.append(contour)
 
         return real_contours
@@ -186,19 +186,20 @@ class RobotTracker(Tracker):
 
         side_contours = self.getContours(frame, self.side_colors[side], adjustments)
         pink_contours = self.getContours(frame, 'pink', adjustments)
-
+        print len(pink_contours)
         for contour in side_contours:
 
             contour_center = self.getContourCenter(contour)
             pink_contour_count = 0
 
             for pink_contour in pink_contours:
-                pink_contour_center, radius = self.getContourCenter(pink_contour)
+                pink_contour_center = self.getContourCenter(pink_contour)
 
                 dist = self.distance( pink_contour_center, contour_center )
+                print dist
                 if dist < 20*20 :
                     pink_contour_count += 1
-
+            #print pink_contour_count
             if pink_contour_count == self.num_pink[position]:
                 return contour_center
 
@@ -217,6 +218,7 @@ class RobotTracker(Tracker):
             if green_contours == []:
                 return None
 
+            print center
             orientation_green = self.getKClosestContours(1, center, green_contours)
 
             green_center = self.getContourCenter(orientation_green[0])
@@ -231,7 +233,7 @@ class RobotTracker(Tracker):
 
             center = self.transformCoordstoDecartes( center )
             mean_pink_point = self.transformCoordstoDecartes( mean_pink_point )
-            direction_vector = self.getDirectionVector(self, center, mean_pink_point)
+            direction_vector = self.getDirectionVector(center, mean_pink_point)
 
             angle_radians = np.arctan2( direction_vector[1], direction_vector[0] )
             angle_degrees = math.degrees( angle_radians )
@@ -239,7 +241,7 @@ class RobotTracker(Tracker):
         else:
 
             pink_contours = self.getContours(frame, 'pink', adjustments)
-            orientation_pink = self.getKClosestContours(1, center, orientation_contours_pink)
+            orientation_pink = self.getKClosestContours(1, center, pink_contours)
 
             if orientation_pink == []:
                 return None
@@ -250,9 +252,9 @@ class RobotTracker(Tracker):
             pink_center = self.transformCoordstoDecartes( pink_center )
 
             direction_vector = self.getDirectionVector( center, pink_center )
-            direction_vector = self.rotateVector( direction_vector, math.radians(205) )
+            direction_vector = self.rotateVector( direction_vector, math.radians(220) )
 
-            angle_radians = np.arctan2( direction_vector2[1], direction_vector2[0] )
+            angle_radians = np.arctan2( direction_vector[1], direction_vector[0] )
             angle_degrees = math.degrees(angle_radians)
 
         return angle_degrees, direction_vector
