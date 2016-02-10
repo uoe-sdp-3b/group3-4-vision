@@ -98,8 +98,7 @@ class Tracker():
         dx = ( point_1[0] - point_2[0] )
         dy = ( point_1[1] - point_2[1] )
 
-        return dx * dx + dy * dy 
-
+        return dx * dx + dy * dy
 
     def meanPoint(self, points):
 
@@ -115,7 +114,6 @@ class Tracker():
             return None
 
         return ( tx / l, ty / l )
-
 
     def getDirectionVector( self, (cx, cy), (ox, oy) ):
 
@@ -156,7 +154,7 @@ class BallTracker(Tracker):
         self.color = ball_color
 
 
-    # Extracts the ( center, radius ) of our ball
+    # Extracts the center of our ball
     def getBallCoordinates(self, frame):
 
         contours = self.getContours(frame, self.color, adjustments)
@@ -164,8 +162,7 @@ class BallTracker(Tracker):
             return None
         ball_contour = self.getBiggestContour(contours)
 
-        return self.getContourCenter(ball_contour)
-
+        return self.getContourCenter(ball_contour) # x,y
 
 class RobotTracker(Tracker):
 
@@ -265,8 +262,9 @@ class RobotTracker(Tracker):
             angle_radians = np.arctan2( direction_vector[1], direction_vector[0] )
             angle_degrees = math.degrees(angle_radians)
 
-        return (angle_degrees, direction_vector), center
-
+        return (angle_degrees, direction_vector), center # center is an (x,y) tuple x is in range (-320,320)
+                                                                                  # y is in range (-240, 240)
+                                                         # angle_degrees are (Pi, -Pi), so radians
 
     def opponent_green_coordinates(self, frame):
         
