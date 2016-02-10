@@ -2,7 +2,7 @@ from tracker import *
 from camera import Camera
 
 # Make dependent system use this: 
-# sys.path.extend('~/git/group3-4-vision/vision') or similar
+# sys.path.extend('../../group3-4-vision/vision') or similar
 # import G3VisionAPI
 
 def get_info():
