@@ -4,16 +4,17 @@ from calibrate import *
 from socket import gethostname
 
 computer_name = gethostname().split('.')[0]
+computer_name = "knapdale"
 print "Adjusting settings for: " + computer_name
-properties={'POS_MSEC' : 0, 
+properties={'POS_MSEC' : 0,
     'POS_FRAMES' : 1,
-    'FRAME_WIDTH' : 3, 
-    'FRAME_HEIGHT' : 4, 
-    'PROP_FPS' : 5,      
-    'PROP_MODE' : 9, 
-    'BRIGHTNESS' : 10,  
+    'FRAME_WIDTH' : 3,
+    'FRAME_HEIGHT' : 4,
+    'PROP_FPS' : 5,
+    'PROP_MODE' : 9,
+    'BRIGHTNESS' : 10,
     'CONTRAST' : 11,
-    'COLOR' : 12, 
+    'COLOR' : 12,
     'HUE' : 13
 }
 
@@ -30,7 +31,7 @@ class Camera(object):
             self.capture.set(properties['CONTRAST'], 0.45)
             self.capture.set(properties['COLOR'], 0.5)
             self.capture.set(properties['HUE'], 0.5)
-        elif (computer_name == 'knapdale'):    
+        elif (computer_name == 'knapdale'):
             # for pitch1 PC4/ knapdale
             self.capture.set(properties['BRIGHTNESS'], 0.55)
             self.capture.set(properties['CONTRAST'], 0.45)
@@ -47,8 +48,8 @@ class Camera(object):
             self.capture.set(properties['CONTRAST'], 0.5)
             self.capture.set(properties['COLOR'], 0.5)
             self.capture.set(properties['HUE'], 0.5)
-                
-            
+
+
 
     def get_frame(self, radial_dist=0):
         """
