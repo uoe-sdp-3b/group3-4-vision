@@ -22,10 +22,10 @@ def get_info():
   colors['blue'] = (255,0,0)
 
    
-  print "\nPossible team colors: yellow/light_blue\n"
-  our_team_color = raw_input("Specify your team colour: ")
-  num_of_pink = raw_input("Specify the number of pink dots on your robot: ")
-  ball_color = raw_input("Specify ball color: ")
+  #print "\nPossible team colors: yellow/light_blue\n"
+  our_team_color = 'light_blue' # Change if needed!
+  num_of_pink = 1 # Change if needed!
+  ball_color = 'red' # Change if needed!
 
   # create our robot as object:
   our_robot = RobotTracker(our_team_color, int(num_of_pink))
@@ -63,6 +63,10 @@ def get_info():
       
   c.close()
   
-  return (Tracker.transformCoordstoDecartes(ball_center), our_robot_center, our_orientation[1])
-           # x,y ball coordinatees                  # x,y bot coordinates   # direction vector
-                                                                            # (angle would be our_orientation[0])
+  ball_coords = Tracker.transformCoordstoDecartes(ball_center)
+  
+  # 0.46 is the estimated pixel -> cm ratio
+  return (ball_coords[0] * 0.46, ball_coords[1] * 0.46),  # x,y ball coordinatees in cm
+         (our_robot_center[0] * 0.46, our_robot_center[1] * 0.46),   # x,y bot coordinates in cm
+         our_orientation[1])                             # direction vector (not scaled to anything)
+     
