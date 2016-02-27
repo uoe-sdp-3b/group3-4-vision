@@ -166,7 +166,10 @@ class BallTracker(Tracker):
 
 class RobotTracker(Tracker):
 
-    def __init__(self, our_color='yellow', num_of_pink = 1):
+    def __init__(self, our_color='yellow', num_of_pink = 1, computer=None):
+        global computer_name
+        if computer:
+            computer_name = computer
 
         self.side_colors = {}
         if (our_color == 'yellow'):
