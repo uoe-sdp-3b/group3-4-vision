@@ -28,6 +28,14 @@ camera settings are very dependent pitch settings:
 This ALWAYS needs to be configured in a few files when you know which pitch is to be used.
 Depending on the pitch settings the camera feed is undistorted in a very different way.
 
+## Planning Wrapper
+
+A simple wrapper around the Vision system has been included in the `planningwrapper` directory.
+It contains a `WorldApi` object, which handles all of the polling from the vision server.
+
+please note that you _need_ to call `api.close()` before you exit your program (even if your program crashes!).
+This is covered in more detail in the *sample_planner.py* file.
+
 
 # TODO
 

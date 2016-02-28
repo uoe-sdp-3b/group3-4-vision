@@ -17,6 +17,7 @@ class Planner:
             while True:
                 print(api.get_time())
         finally:
+            # This needs to be run on both a clean or unclean exit. otherwise your threads won't close gracefully
             api.close()
 
 
