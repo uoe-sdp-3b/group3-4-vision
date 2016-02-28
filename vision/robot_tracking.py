@@ -196,11 +196,11 @@ def main():
         socket.send_pyobj({
             "time": time.time(),
             "ball_center": ball_center,
-            "us": {
+            "green_ally": {
                 "orientation": our_orientation,
                 "location": our_robot_center
             },
-            "mate": {
+            "pink_ally": {
                 "orientation": our_mate_orientation,
                 "location": our_mate_center
             },
