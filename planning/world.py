@@ -40,7 +40,7 @@ class WorldApi():
             obj = None
             try:
                 obj = socket.recv_pyobj()
-            except zmq.Again as e:
+            except zmq.Again:
                 log.warn("Thread not receiving anything")
 
             if obj is not None:
@@ -50,36 +50,28 @@ class WorldApi():
         socket.close()
         log.debug("Thread Closed")
 
-    # TODO: look into making this more generic
-    # ugly blocking hax
+    def ready(self):
+        """
+        whether the world api is ready yet
+        """
+        return self.thread_ready
+
     def get_allied_green(self):
-        while not self.thread_ready:
-            pass
         return self.world.allied_green
 
     def get_allied_pink(self):
-        while not self.thread_ready:
-            pass
         return self.world.allied_pink
 
     def get_opponent_green(self):
-        while not self.thread_ready:
-            pass
         return self.world.green_opponent
 
     def get_opponent_pink(self):
-        while not self.thread_ready:
-            pass
         return self.world.pink_opponent
 
     def get_ball(self):
-        while not self.thread_ready:
-            pass
         return self.world.ball
 
     def get_time(self):
-        while not self.thread_ready:
-            pass
         return self.world.time
 
 
