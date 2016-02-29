@@ -15,10 +15,9 @@ def step(frame, pitch):
     functions = [
         perspective,
         #translate,
-        undistort,
+        partial(undistort, pitch),
         #warp,
         translate,
-        partial(undistort, pitch),
         warp,
         ]
 
