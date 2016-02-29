@@ -23,7 +23,11 @@ class Camera(object):
     """
 
     def __init__(self, port=0, pitch=0, config="./config/undistort_pitch0.json"):
-        self.pitches = util.read_json(config)
+        try:
+            self.pitches = util.read_json(config)
+        except Exception as e:
+            print(e)
+            raise e
         self.pitch = pitch
         self.capture = cv2.VideoCapture(port)
         if (computer_name == 'aharacle' or computer_name == 'kilmore'):
