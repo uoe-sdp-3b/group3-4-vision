@@ -1,4 +1,4 @@
-import sys
+    import sys
 #sys.path.insert(0, '../')
 from camera import Camera
 from calibrate import step
@@ -6,6 +6,8 @@ import math
 from matplotlib import pyplot as plt
 import numpy as np
 import cv2
+
+from sliders import getIndividualColour
 
 from socket import gethostname
 from colorsHSV import *
@@ -24,13 +26,13 @@ BLUE_HIGHER = np.array([120, 255, 255])
 CYAN_LOWER = np.array([80, 110, 110])
 CYAN_HIGHER = np.array([100, 255, 255])
 
-PINK_LOWER = np.array([150, 110, 110]) 
+PINK_LOWER = np.array([150, 110, 110])
 PINK_HIGHER = np.array([175, 255, 255])
 
-RED_LOWER = np.array([0, 190, 190]) 
+RED_LOWER = np.array([0, 190, 190])
 RED_HIGHER = np.array([4, 255, 255])
 
-MAROON_LOWER = np.array([176, 190, 190]) 
+MAROON_LOWER = np.array([176, 190, 190])
 MAROON_HIGHER = np.array([180, 255, 255])
 
 GREEN_LOWER = np.array([60, 110, 110])
@@ -41,6 +43,40 @@ BRIGHT_GREEN_HIGHER = np.array([55, 255, 255])
 
 YELLOW_LOWER = np.array([33, 190, 190])
 YELLOW_HIGHER = np.array([43, 255, 255])
+
+###### Change colours to those from colour picker
+
+WHITE_LOWER = np.array(getIndividualColour(WHITE_LOWER[0], WHITE_LOWER[1], WHITE_LOWER[2], "WHITE_LOWER"))
+WHITE_HIGHER = np.array(getIndividualColour(WHITE_HIGHER[0], WHITE_HIGHER[1], WHITE_HIGHER[2], "WHITE_HIGHER"))
+
+BLUE_LOWER = np.array(getIndividualColour(BLUE_LOWER[0], BLUE_LOWER[1], BLUE_LOWER[2], "BLUE_LOWER"))
+BLUE_HIGHER = np.array(getIndividualColour(BLUE_HIGHER[0], BLUE_HIGHER[1], BLUE_HIGHER[2], "BLUE_HIGHER"))
+
+CYAN_LOWER = np.array(getIndividualColour(CYAN_LOWER[0], CYAN_LOWER[1], CYAN_LOWER[2], "CYAN_LOWER"))
+CYAN_HIGHER = np.array(getIndividualColour(CYAN_HIGHER[0], CYAN_HIGHER[1], CYAN_HIGHER[2], "CYAN_HIGHER"))
+
+PINK_LOWER = np.array(getIndividualColour(PINK_LOWER[0], PINK_LOWER[1], PINK_LOWER[2], "PINK_LOWER"))
+PINK_HIGHER = np.array(getIndividualColour(PINK_HIGHER[0], PINK_HIGHER[1], PINK_HIGHER[2], "PINK_HIGHER"))
+
+RED_LOWER = np.array(getIndividualColour(RED_LOWER[0], RED_LOWER[1], RED_LOWER[2], "RED_LOWER"))
+RED_HIGHER = np.array(getIndividualColour(RED_HIGHER[0], RED_HIGHER[1], RED_HIGHER[2], "RED_HIGHER"))
+
+MAROON_LOWER = np.array(getIndividualColour(MAROON_LOWER[0], MAROON_LOWER[1], MAROON_LOWER[2], "MAROON_LOWER"))
+MAROON_HIGHER = np.array(getIndividualColour(MAROON_HIGHER[0], MAROON_HIGHER[1], MAROON_HIGHER[2], "MAROON_HIGHER"))
+
+GREEN_LOWER = np.array(getIndividualColour(GREEN_LOWER[0], GREEN_LOWER[1], GREEN_LOWER[2], "GREEN_LOWER"))
+GREEN_HIGHER = np.array(getIndividualColour(GREEN_HIGHER[0], GREEN_HIGHER[1], GREEN_HIGHER[2], "GREEN_HIGHER"))
+
+BRIGHT_GREEN_LOWER = np.array(getIndividualColour(BRIGHT_GREEN_LOWER[0], BRIGHT_GREEN_LOWER[1], BRIGHT_GREEN_LOWER[2], "BRIGHT_GREEN_LOWER"))
+BRIGHT_GREEN_HIGHER = np.array(getIndividualColour(BRIGHT_GREEN_HIGHER[0], BRIGHT_GREEN_HIGHER[1], BRIGHT_GREEN_HIGHER[2], "BRIGHT_GREEN_HIGHER"))
+
+YELLOW_LOWER = np.array(getIndividualColour(YELLOW_LOWER[0], YELLOW_LOWER[1], YELLOW_LOWER[2], "YELLOW_LOWER"))
+YELLOW_HIGHER = np.array(getIndividualColour(YELLOW_HIGHER[0], YELLOW_HIGHER[1], YELLOW_HIGHER[2], "YELLOW_HIGHER"))
+
+
+######
+
+
 
 c = Camera()
 num_of_pink_dots = 0
@@ -61,7 +97,7 @@ while(1):
 	maroon_mask = cv2.inRange(hsv, color_range[(computer_name, 'maroon')][0], color_range[(computer_name, 'maroon')][1])
 	red = cv2.bitwise_or(red_mask, maroon_mask)
 	haha = cv2.bitwise_or(green_mask, cyan_mask)
-	
+
 	cv2.imshow('red', red)
 	cv2.imshow('pink_mask', pink_mask)
 	cv2.imshow('green_mask', green_mask)
@@ -84,7 +120,7 @@ while(1):
 	_, cyan_contours, _ = cv2.findContours(bright_blue_thresh, 1, 2)
 	_, red_contours, _ = cv2.findContours(red_thresh, 1, 2)
 	_, blue_contours, _ = cv2.findContours(blue_thresh, 1, 2)
-	
+
 	#print len(green_contours)
 	pink_balls = []
 	green_balls = []
@@ -94,7 +130,7 @@ while(1):
 		if M['m00'] == 0 :
 			continue
 
-		# center coordinates:	
+		# center coordinates:
 		cx = int(M['m10']/M['m00'])
 		cy = int(M['m01']/M['m00'])
 
@@ -111,7 +147,7 @@ while(1):
 		if M['m00'] == 0 :
 			continue
 
-		# center coordinates:	
+		# center coordinates:
 		cx = int(M['m10']/M['m00'])
 		cy = int(M['m01']/M['m00'])
 
@@ -121,14 +157,14 @@ while(1):
 		radius = int(radius)
 		if radius >= 2:
 			cv2.circle(frame,center,7,(255,0,0),2)
-			
+
 	for i in range(0, len(pink_contours)):
 		cnt = pink_contours[i]
 		M = cv2.moments(cnt)
 		if M['m00'] == 0 :
 			continue
 
-		# center coordinates:	
+		# center coordinates:
 		cx = int(M['m10']/M['m00'])
 		cy = int(M['m01']/M['m00'])
 
@@ -139,14 +175,14 @@ while(1):
 		radius = int(radius)
 		if radius >= 2:
 			cv2.circle(frame,center,radius,(147,20,255),2)
-		
+
 	for i in range(0, len(green_contours)):
 		cnt = green_contours[i]
 		M = cv2.moments(cnt)
 		if M['m00'] == 0 :
 			continue
 
-		# center coordinates:	
+		# center coordinates:
 		cx = int(M['m10']/M['m00'])
 		cy = int(M['m01']/M['m00'])
 
@@ -157,14 +193,14 @@ while(1):
 		radius = int(radius)
 		if radius >= 2:
 			cv2.circle(frame,center,radius,(0,255,0),2)
-	
+
 	for i in range(0, len(cyan_contours)):
 		cnt = cyan_contours[i]
 		M = cv2.moments(cnt)
 		if M['m00'] == 0 :
 			continue
 
-		# center coordinates:	
+		# center coordinates:
 		cx = int(M['m10']/M['m00'])
 		cy = int(M['m01']/M['m00'])
 
@@ -181,7 +217,7 @@ while(1):
 		if M['m00'] == 0 :
 			continue
 
-		# center coordinates:	
+		# center coordinates:
 		cx = int(M['m10']/M['m00'])
 		cy = int(M['m01']/M['m00'])
 
@@ -194,7 +230,7 @@ while(1):
 				num_of_pink += 1
 		for i in range(0, len(green_balls)):
 			if (math.sqrt(((x-green_balls[i][0])**2)+(y-green_balls[i][1])**2) < 17):
-				num_of_green += 1		
+				num_of_green += 1
 
 		center = (int(x),int(y))
 		radius = int(radius)
@@ -204,15 +240,15 @@ while(1):
 		if num_of_pink < 2 and num_of_green > 1:
 			cv2.putText(frame,'OUR',(center[0]-15, center[1]+30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, 220)
 			cv2.putText(frame,'ATTACKER',(center[0]-30, center[1]+40), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, 220)
-		if radius >= 2:	
-			cv2.circle(frame,center,20,(90,0,0),2)	
+		if radius >= 2:
+			cv2.circle(frame,center,20,(90,0,0),2)
 
 	cv2.imshow('frame',frame)
 
-	
+
 	k = cv2.waitKey(5) & 0xFF
 	if k == 27:
 		break
 
-c.close() 
-cv2.destroyAllWindows()       
+c.close()
+cv2.destroyAllWindows()
