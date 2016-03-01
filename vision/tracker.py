@@ -142,9 +142,9 @@ class RobotTracker(Tracker):
 
         for side, side_robs in robots.iteritems():
             for color, robot in side_robs.iteritems():
-                center = robot.center
+                center = robot['center']
                 orientation = self.getRobotOrientation(center, green_contours, pink_contours, side)
-                robots[side][color].orientation = orientation
+                robots[side][color]['orientation'] = orientation
 
 
         return robots
@@ -152,7 +152,7 @@ class RobotTracker(Tracker):
 
     def getRobotCoordinates(self, side_contours, pink_contours):
 
-        side_robots = {'green' : Robot(), 'pink' : Robot()}
+        side_robots = {'green' : { "orientation": None, "center": None}, 'pink' : { "orientation": None, "center": None}}
         for contour in side_contours:
 
             contour_center = self.getContourCenter(contour)
@@ -167,9 +167,15 @@ class RobotTracker(Tracker):
                     pink_contour_count += 1
 
             if pink_contour_count == 1:
-                side_robots['green'] = Robot(contour_center, None)
+                side_robots['green'] = {
+                    "center": contour_center,
+                    "orientation": None
+                }
             elif pink_contour_count == 3:
-                side_robots['pink'] = Robot(contour_center, None)
+                side_robots['pink'] = {
+                    "center": contour_center,
+                    "orientation": None
+                }
 
         return side_robots
 

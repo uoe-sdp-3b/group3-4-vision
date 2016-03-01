@@ -45,6 +45,7 @@ class WorldApi():
 
             if obj is not None:
                 self.thread_ready = True
+                log.debug(obj)
                 self.world = World(obj)
 
         socket.close()
@@ -68,12 +69,6 @@ class WorldApi():
     def get_opponent_pink(self):
         return self.world.pink_opponent
 
-    def get_ball(self):
-        return self.world.ball
-
-    def get_time(self):
-        return self.world.time
-
 
 class World():
     """
@@ -81,11 +76,9 @@ class World():
     """
     def __init__(self, d):
         try:
-            self.time = d["time"]
-            self.ball = d["ball_center"]
-            self.allied_green = d["green_ally"]
-            self.allied_pink = d["pink_ally"]
-            self.pink_opponent = d["pink_opponent"]
-            self.green_opponent = d["green_opponent"]
+            self.allied_green = d['ally']['green']
+            self.allied_pink = d['ally']['pink']
+            self.pink_opponent = d['enemy']['pink']
+            self.green_opponent = d['enemy']['green']
         except KeyError as e:
             log.error("Error accessing key " + e.message)

@@ -104,8 +104,8 @@ def main():
 
         for side, side_robs in robots_all.iteritems():
             for color, robot in side_robs.iteritems():
-                center = robots_all[side][color].center
-                orientation = robots_all[side][color].orientation
+                center = robots_all[side][color]['center']
+                orientation = robots_all[side][color]['orientation']
                 if (orientation is not None) and (center is not None):
                     _, v = orientation
                     x, y = transformCoordstoDecartes(center)
