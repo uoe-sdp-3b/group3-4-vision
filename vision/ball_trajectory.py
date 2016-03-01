@@ -23,11 +23,11 @@ def equivalent ( p1, p2 ):
     return p1[0] == p2[0] and p1[1] == p2[1]
 
 def linear_regression( points ):
-    
-    
+
+
     if Tracker.distance(points[0], meanPoint(points)) < 10 :
         return [0, 1]
-    
+
     num_pts = len(points)
     xc = points[:, [0]]
     yc = points[:, [1]]
@@ -38,12 +38,12 @@ def linear_regression( points ):
     Y_intermediary = np.dot(X.T, yc)
 
     R = np.dot( inv(X_intermediary), Y_intermediary )
-    
+
     k = R[1][0]
     last_2 = points[-2:]
     first_x = last_2[0][0]
     second_x = last_2[1][0]
-    
+
     if first_x < second_x :
         return [1, k]
     else :
@@ -60,7 +60,7 @@ color = raw_input("Specify ball color: ")
 while 1:
     if color == 'blue' or color == 'red':
         break
-    else:    
+    else:
         color = raw_input("Wrong color! Enter ball color again: ")
 
 t = BallTracker(color)
