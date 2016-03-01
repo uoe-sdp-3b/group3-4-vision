@@ -129,23 +129,25 @@ class RobotTracker(Tracker):
         pink_contours = self.getContours(frame, 'pink', adjustments)
         green_contours = self.getContours(frame, 'green', adjustments)
 
+
         robots = {}
         for side_color in self.side_identifiers:
             side_contours = self.getContours(frame, side_color, adjustments)
             side_robots = self.getRobotCoordinates(side_contours, pink_contours)
-            print(side_robots)
+            #print(side_robots)
             if( side_color == self.ally_color ):
                 robots['ally'] = side_robots
             else :
                 robots['enemy'] = side_robots
+
         for side, side_robs in robots.iteritems():
             for color, robot in side_robs.iteritems():
                 center = robot.center
                 orientation = self.getRobotOrientation(center, green_contours, pink_contours, side)
                 robots[side][color].orientation = orientation
 
-            print(robots)
-            return robots
+
+        return robots
 
 
     def getRobotCoordinates(self, side_contours, pink_contours):
@@ -174,7 +176,7 @@ class RobotTracker(Tracker):
 
     def getRobotOrientation(self, center, green_contours, pink_contours, group_color):
 
-        magnitude = 30
+        magnitude = 30.0
 
         if center is None:
             return None, None
@@ -221,4 +223,4 @@ class RobotTracker(Tracker):
             angle_radians = np.arctan2( direction_vector[1], direction_vector[0] )
             angle_degrees = math.degrees(angle_radians)
 
-        return (angle_degrees, direction_vector), center
+        return (angle_degrees, direction_vector)
