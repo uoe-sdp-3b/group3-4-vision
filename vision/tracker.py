@@ -2,7 +2,6 @@ from camera import Camera
 from calibrate_frame import step
 from matplotlib import pyplot as plt
 from socket import gethostname
-from robot import Robot
 import numpy as np
 import cv2
 import math
@@ -112,7 +111,9 @@ class BallTracker(Tracker):
         if contours is None:
             return None
         ball_contour = self.getBiggestContour(contours)
+        # print(len(contours))
 
+        print self.getContourCenter(ball_contour)
         return self.getContourCenter(ball_contour)
 
 
@@ -126,15 +127,14 @@ class RobotTracker(Tracker):
 
     def getAllRobots(self, frame):
 
-        pink_contours = self.getContours(frame, 'pink', adjustments)
-        green_contours = self.getContours(frame, 'green', adjustments)
-
+        helper_contours = {}
+        helper_contours['pink'] = self.getContours(frame, 'pink', adjustments)
+        helper_contours['green'] = self.getContours(frame, 'green', adjustments)
 
         robots = {}
         for side_color in self.side_identifiers:
             side_contours = self.getContours(frame, side_color, adjustments)
-            side_robots = self.getRobotCoordinates(side_contours, pink_contours)
-            #print(side_robots)
+            side_robots = self.getRobotCoordinates(side_contours, helper_contours['pink'])
             if( side_color == self.ally_color ):
                 robots['ally'] = side_robots
             else :
@@ -143,7 +143,7 @@ class RobotTracker(Tracker):
         for side, side_robs in robots.iteritems():
             for color, robot in side_robs.iteritems():
                 center = robot['center']
-                orientation = self.getRobotOrientation(center, green_contours, pink_contours, side)
+                orientation = self.getRobotOrientation(center, helper_contours, color)
                 robots[side][color]['orientation'] = orientation
 
 
@@ -180,53 +180,44 @@ class RobotTracker(Tracker):
         return side_robots
 
 
-    def getRobotOrientation(self, center, green_contours, pink_contours, group_color):
+    def getRobotOrientation(self, center, helper_contours, group_color):
 
         magnitude = 30.0
+
+
+        # print(helper_contours)
 
         if center is None:
             return None, None
 
         if group_color == 'pink':
+            main_color = 'pink'
+            support_color = 'green'
+        else :
+            main_color = 'green'
+            support_color = 'pink'
 
-            if green_contours == []:
-                return None, None
+        # for _, cont in helper_contours:
+        #     if cont == []:
+        #         return None, None
+        orientation_support = self.getKClosestContours(1, center, helper_contours[support_color])
+        support_center = self.getContourCenter(orientation_support[0])
 
-            orientation_green = self.getKClosestContours(1, center, green_contours)
+        orientation_main = self.getKClosestContours(3, center, helper_contours[main_color])
+        orientation_main = self.getKFurthestContours(2, support_center, orientation_main)
 
-            green_center = self.getContourCenter(orientation_green[0])
+        if len(orientation_main) != 2:
+            return None, None
 
-            orientation_pink = self.getKClosestContours(3, green_center, pink_contours)
-            orientation_pink = self.getKFurthestContours(2, green_center, orientation_pink)
-            if len(orientation_pink) != 2:
-                return None, None
+        main_centers = self.getContourCenters(orientation_main)
+        # print(main_centers)
+        mean_main_point = meanPoint(main_centers)
 
-            pink_centers = self.getContourCenters(orientation_pink)
-            mean_pink_point = meanPoint(pink_centers)
+        center = transformCoordstoDecartes( center )
+        mean_main_point = transformCoordstoDecartes( mean_main_point )
 
-            center = transformCoordstoDecartes( center )
-            mean_pink_point = transformCoordstoDecartes( mean_pink_point )
-            direction_vector = getDirectionVector(center, mean_pink_point, magnitude)
-
-            angle_radians = np.arctan2( direction_vector[1], direction_vector[0] )
-            angle_degrees = math.degrees( angle_radians )
-
-        else:
-
-            orientation_pink = self.getKClosestContours(1, center, pink_contours)
-
-            if orientation_pink == []:
-                return None, None
-
-            pink_center = self.getContourCenter(orientation_pink[0])
-
-            center = transformCoordstoDecartes(center)
-            pink_center = transformCoordstoDecartes( pink_center )
-
-            direction_vector = getDirectionVector( center, pink_center, magnitude )
-            direction_vector = rotateVector( direction_vector, math.radians(215) )
-
-            angle_radians = np.arctan2( direction_vector[1], direction_vector[0] )
-            angle_degrees = math.degrees(angle_radians)
+        direction_vector = getDirectionVector(center, mean_main_point, magnitude)
+        angle_radians = np.arctan2( direction_vector[1], direction_vector[0] )
+        angle_degrees = math.degrees( angle_radians )
 
         return (angle_degrees, direction_vector)

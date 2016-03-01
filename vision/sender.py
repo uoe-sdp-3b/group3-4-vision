@@ -1,7 +1,6 @@
 from tracker import *
 from camera import Camera
 from algebra import *
-from robot import *
 
 import argparse
 import time
@@ -86,12 +85,14 @@ def main():
         frame = c.get_frame()
 
         # get robot orientations and centers, also get ball coordinates
+        robots_all = None
+        ball_centre = None
         try:
             ball_center = ball_tracker.getBallCoordinates(frame)
             robots_all = robot_tracker.getAllRobots(frame)
         except ValueError:
             print("Exception calculating ball")
-            ball_center = None
+            raise
 
         if ball_center is not None:
             cv2.circle(frame, (int(ball_center[0]), int(ball_center[1])), 7,
@@ -107,7 +108,8 @@ def main():
                 center = robots_all[side][color]['center']
                 orientation = robots_all[side][color]['orientation']
                 if (orientation is not None) and (center is not None):
-                    _, v = orientation
+                    a, v = orientation
+                    print(side, color, a)
                     x, y = transformCoordstoDecartes(center)
                     draw_vector = (x + v[0], y + v[1])
                     x, y = transformCoordstoCV(draw_vector)
@@ -133,7 +135,7 @@ def main():
         #         print('Orientation: ', robot.orientation)
 
         socket.send_pyobj(robots_all)
-        print(robots_all)
+        # print(robots_all)
 
         cv2.imshow('frame', frame)
 
