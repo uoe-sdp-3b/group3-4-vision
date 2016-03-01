@@ -1,6 +1,7 @@
 from tracker import *
 from camera import Camera
 from algebra import *
+from robot import *
 
 import argparse
 import time
@@ -51,7 +52,7 @@ def main():
     #print("(%s, %s, %s)" % (our_team_color, num_of_pink, ball_color))
 
     # create our robot as object:
-    robot_tracker = RobotTracker(our_team_color, computer=args.c)
+    robot_tracker = RobotTracker(our_team_color)
     ball_tracker = BallTracker(ball_color)
 
     # convert string colors into GBR
@@ -87,7 +88,7 @@ def main():
         # get robot orientations and centers, also get ball coordinates
         try:
             ball_center = ball_tracker.getBallCoordinates(frame)
-            robots_all = robot_tracker.getAllRobots(our_team_color)
+            robots_all = robot_tracker.getAllRobots(frame)
             '''our_orientation, our_robot_center = our_robot.getRobotOrientation(
                 frame, 'us', our_robot_color)
             our_mate_orientation, our_mate_center = our_robot.getRobotOrientation(
@@ -118,11 +119,11 @@ def main():
         pink_opponent_center = None
         green_opponent_center = None'''
 
-        for side, side_robs in robots.iteritems():
+        for side, side_robs in robots_all.iteritems():
             for color, robot in side_robs.iteritems():
-                center = robots[side][color].center
-                orientation = robots[side][color].orientation
-                if orientation is not None:
+                center = robots_all[side][color].center
+                orientation = robots_all[side][color].orientation
+                if (orientation is not None) and (center is not None):
                     _, v = orientation
                     x, y = center
                     draw_vector = (x + v[0], y + v[1])
@@ -133,13 +134,13 @@ def main():
                             (int(x), int(y)), (0, 0, 255), 2)
                     cv2.circle(frame,
                             (int(center[0]),
-                                int(center[1])), 20, our_circle_color, 2)
+                                int(center[1])), 20, (0,0,255), 2)
                     cv2.putText(frame, side, (int(center[0]) - 15,
                                             int(center[1]) + 30),
-                                cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, our_col)
+                                cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0,0,255))
                     cv2.putText(frame, color, (int(center[0]) - 20,
                                                     int(center[1]) + 40),
-                                cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, our_col)
+                                cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0,0,255))
 
 
 
@@ -243,7 +244,7 @@ def main():
             }
         })'''
 
-        socket.send_pyobj(robots)
+        socket.send_pyobj(robots_all)
 
         cv2.imshow('frame', frame)
 

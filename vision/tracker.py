@@ -1,7 +1,8 @@
 from camera import Camera
-from calibrate import step
+from calibrate_frame import step
 from matplotlib import pyplot as plt
 from socket import gethostname
+from robot import Robot
 import numpy as np
 import cv2
 import math
@@ -66,14 +67,14 @@ class Tracker():
 
     def getKFurthestContours(self, k, p, contours):
 
-        distances = [ self.distance( p, self.getContourCenter(c) ) for c in contours ]
+        distances = [ distance( p, self.getContourCenter(c) ) for c in contours ]
         distances_sorted = np.argsort(distances)
         return [ contours[x] for x in distances_sorted[-k:] ]
 
 
     def getKClosestContours(self, k, p, contours):
 
-        distances = [ self.distance( p, self.getContourCenter(c) ) for c in contours ]
+        distances = [ distance( p, self.getContourCenter(c) ) for c in contours ]
         distances_sorted = np.argsort(distances)
 
         return [ contours[x] for x in distances_sorted[:k]]
@@ -131,24 +132,25 @@ class RobotTracker(Tracker):
         robots = {}
         for side_color in self.side_identifiers:
             side_contours = self.getContours(frame, side_color, adjustments)
-            side_robots = getRobotCoordinates(self, side_contours, pink_contours)
+            side_robots = self.getRobotCoordinates(side_contours, pink_contours)
+            print(side_robots)
             if( side_color == self.ally_color ):
                 robots['ally'] = side_robots
             else :
                 robots['enemy'] = side_robots
-
         for side, side_robs in robots.iteritems():
             for color, robot in side_robs.iteritems():
-                center = robots[side][color].center
-                orientation = getRobotOrientation(genter, green_contours, pink_contours, side)
+                center = robot.center
+                orientation = self.getRobotOrientation(center, green_contours, pink_contours, side)
                 robots[side][color].orientation = orientation
 
+            print(robots)
             return robots
 
 
     def getRobotCoordinates(self, side_contours, pink_contours):
 
-        side_robots = {'green' : None, 'pink' : None}
+        side_robots = {'green' : Robot(), 'pink' : Robot()}
         for contour in side_contours:
 
             contour_center = self.getContourCenter(contour)
@@ -179,9 +181,6 @@ class RobotTracker(Tracker):
 
         if group_color == 'pink':
 
-            green_contours = self.getContours(frame, 'green', adjustments)
-            pink_contours = self.getContours(frame, 'pink', adjustments)
-
             if green_contours == []:
                 return None, None
 
@@ -206,7 +205,6 @@ class RobotTracker(Tracker):
 
         else:
 
-            pink_contours = self.getContours(frame, 'pink', adjustments)
             orientation_pink = self.getKClosestContours(1, center, pink_contours)
 
             if orientation_pink == []:

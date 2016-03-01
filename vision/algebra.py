@@ -1,3 +1,5 @@
+import math
+
 def distance(point_1, point_2):
 
     dx = ( point_1[0] - point_2[0] )
@@ -24,7 +26,7 @@ def meanPoint(points):
 
 def getVectorMagnitude(v):
 
-    return (v[0]^2 + v[1]^2) ** (0.5)
+    return (v[0] ** 2 + v[1] ** 2) ** (0.5)
 
 
 def getDirectionVector( (cx, cy), (ox, oy), length ):
