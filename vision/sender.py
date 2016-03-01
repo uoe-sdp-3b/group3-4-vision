@@ -1,5 +1,6 @@
 from tracker import *
 from camera import Camera
+from algebra import *
 
 import argparse
 import time
@@ -8,23 +9,19 @@ import zmq
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p",
-                        help="Pitch Number",
-                        required=True,
-                        choices=["0", "1"])
     parser.add_argument("-t",
                         help="Our Team Colour",
                         required=True,
                         choices=["yellow", "light_blue"])
-    parser.add_argument("-d",
+    '''parser.add_argument("-d",
                         help="Number of dots",
                         required=True,
-                        choices=["1", "3"])
+                        choices=["1", "3"])'''
     parser.add_argument("-b",
                         help="Ball Colour",
                         required=True,
                         choices=["red", "blue"])
-    parser.add_argument("-c", help="Computer Name (useful for testing)")
+    #parser.add_argument("-c", help="Computer Name (useful for testing)")
 
     return parser.parse_args()
 
@@ -36,7 +33,7 @@ def main():
     socket.bind("tcp://*:5555")
 
     args = parse_args()
-    c = Camera(args.p)
+    c = Camera()
 
     frame = c.get_frame()
 
@@ -49,23 +46,23 @@ def main():
     colors['blue'] = (255, 0, 0)
 
     our_team_color = args.t
-    num_of_pink = args.d
+    #num_of_pink = args.d
     ball_color = args.b
-    print("(%s, %s, %s)" % (our_team_color, num_of_pink, ball_color))
+    #print("(%s, %s, %s)" % (our_team_color, num_of_pink, ball_color))
 
     # create our robot as object:
-    our_robot = RobotTracker(our_team_color, int(num_of_pink), computer=args.c)
-    ball = BallTracker(ball_color)
+    robot_tracker = RobotTracker(our_team_color, computer=args.c)
+    ball_tracker = BallTracker(ball_color)
 
     # convert string colors into GBR
-    our_circle_color = colors[our_team_color]
+    '''our_circle_color = colors[our_team_color]
     if our_team_color == 'yellow':
         opponent_circle_color = colors['light_blue']
     else:
-        opponent_circle_color = colors['yellow']
+        opponent_circle_color = colors['yellow']'''
 
     # assign colors and names to the robots
-    if int(num_of_pink) == 1:
+    '''if int(num_of_pink) == 1:
         our_letters = 'GREEN'
         our_col = colors['green']
         our_robot_color = 'green_robot'
@@ -78,7 +75,7 @@ def main():
         our_robot_color = 'pink_robot'
         mate_letters = 'GREEN'
         mate_col = colors['green']
-        our_mate_color = 'green_robot'
+        our_mate_color = 'green_robot'''
 
     # main feed controller:
     while True:
@@ -89,22 +86,23 @@ def main():
 
         # get robot orientations and centers, also get ball coordinates
         try:
-            ball_center = ball.getBallCoordinates(frame)
-            our_orientation, our_robot_center = our_robot.getRobotOrientation(
+            ball_center = ball_tracker.getBallCoordinates(frame)
+            robots_all = robot_tracker.getAllRobots(our_team_color)
+            '''our_orientation, our_robot_center = our_robot.getRobotOrientation(
                 frame, 'us', our_robot_color)
             our_mate_orientation, our_mate_center = our_robot.getRobotOrientation(
                 frame, 'us', our_mate_color)
             pink_opponent_orientation, pink_opponent_center = our_robot.getRobotOrientation(
                 frame, 'opponent', 'pink_robot')
             green_opponent_orientation, green_opponent_center = our_robot.getRobotOrientation(
-                frame, 'opponent', 'green_robot')
+                frame, 'opponent', 'green_robot')'''
         except ValueError:
             print("Exception calculating ball")
             ball_center = None
-            our_orientation = None
+            '''our_orientation = None
             our_mate_orientation = None
             pink_opponent_orientation = None
-            green_opponent_orientation = None
+            green_opponent_orientation = None'''
 
         if ball_center is not None:
             cv2.circle(frame, (int(ball_center[0]), int(ball_center[1])), 7,
@@ -115,11 +113,37 @@ def main():
                         colors[ball_color])
         # draw circle  around robots:
 
-        our_robot_center = None
+        '''our_robot_center = None
         our_mate_center = None
         pink_opponent_center = None
-        green_opponent_center = None
-        if our_orientation is not None:
+        green_opponent_center = None'''
+
+        for side, side_robs in robots.iteritems():
+            for color, robot in side_robs.iteritems():
+                center = robots[side][color].center
+                orientation = robots[side][color].orientation
+                if orientation is not None:
+                    _, v = orientation
+                    x, y = center
+                    draw_vector = (x + v[0], y + v[1])
+                    x, y = transformCoordstoCV(draw_vector)
+                    center = transformCoordstoCV(center)
+                    cv2.line(frame,
+                            (int(center[0]), int(center[1])),
+                            (int(x), int(y)), (0, 0, 255), 2)
+                    cv2.circle(frame,
+                            (int(center[0]),
+                                int(center[1])), 20, our_circle_color, 2)
+                    cv2.putText(frame, side, (int(center[0]) - 15,
+                                            int(center[1]) + 30),
+                                cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, our_col)
+                    cv2.putText(frame, color, (int(center[0]) - 20,
+                                                    int(center[1]) + 40),
+                                cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, our_col)
+
+
+
+        '''if our_orientation is not None:
             _, v0 = our_orientation
             x0, y0 = our_robot_center
             vector0 = (x0 + v0[0] * 20, y0 + v0[1] * 20)
@@ -177,8 +201,6 @@ def main():
                         cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (127, 0, 255))
 
         if green_opponent_orientation is not None:
-            print(green_opponent_orientation)
-            print(green_opponent_center)
             _, v3 = green_opponent_orientation
             x3, y3 = green_opponent_center
             vector3 = (x3 + v3[0] * 20, y3 + v3[1] * 20)
@@ -219,7 +241,9 @@ def main():
                 "orientation": green_opponent_orientation,
                 "location": green_opponent_center
             }
-        })
+        })'''
+
+        socket.send_pyobj(robots)
 
         cv2.imshow('frame', frame)
 
@@ -229,4 +253,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
