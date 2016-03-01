@@ -1,5 +1,6 @@
 from tracker import *
 from camera import Camera
+
 import argparse
 import time
 import zmq
@@ -7,6 +8,10 @@ import zmq
 
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument("-p",
+                        help="Pitch Number",
+                        required=True,
+                        choices=["0", "1"])
     parser.add_argument("-t",
                         help="Our Team Colour",
                         required=True,
@@ -31,7 +36,7 @@ def main():
     socket.bind("tcp://*:5555")
 
     args = parse_args()
-    c = Camera()
+    c = Camera(args.p)
 
     frame = c.get_frame()
 
@@ -172,6 +177,8 @@ def main():
                         cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (127, 0, 255))
 
         if green_opponent_orientation is not None:
+            print(green_opponent_orientation)
+            print(green_opponent_center)
             _, v3 = green_opponent_orientation
             x3, y3 = green_opponent_center
             vector3 = (x3 + v3[0] * 20, y3 + v3[1] * 20)
@@ -222,3 +229,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
