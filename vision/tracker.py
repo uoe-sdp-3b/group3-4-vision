@@ -100,7 +100,7 @@ class BallTracker(Tracker):
     def getBallCoordinates(self, frame):
 
         contours = self.getContours(frame, self.color, adjustments)
-        if contours is None:
+        if contours == []:
             return None
         ball_contour = self.getBiggestContour(contours)
 

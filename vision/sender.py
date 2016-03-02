@@ -111,10 +111,10 @@ def main():
                 if (orientation is not None) and (center is not None):
                     a, v = orientation
                     print(side, color, a)
-                    x, y = transformCoordstoDecartes(center)
+                    x, y = center
                     draw_vector = (x + v[0], y + v[1])
                     x, y = transformCoordstoCV(draw_vector)
-                    #center = transformCoordstoCV(center)
+                    center = transformCoordstoCV(center)
                     #print(center)
                     cv2.line(frame,
                             (int(center[0]), int(center[1])),
