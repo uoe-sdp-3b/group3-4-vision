@@ -10,8 +10,8 @@ class Camera(object):
 
 
     def __init__(self, pitch=0, port=0):
-        self.capture = cv2.VideoCapture(port)         
-        self.pitch = pitch    
+        self.capture = cv2.VideoCapture(port)
+        self.pitch = pitch
 
     def get_frame(self, radial_dist=0):
         """

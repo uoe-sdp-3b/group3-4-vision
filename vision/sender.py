@@ -95,10 +95,11 @@ def main():
             raise
 
         if ball_center is not None:
-            cv2.circle(frame, (int(ball_center[0]), int(ball_center[1])), 7,
+            _ball = transformCoordstoCV(ball_center)
+            cv2.circle(frame, (int(_ball[0]), int(_ball[1])), 7,
                        colors[ball_color], 2)
             cv2.putText(frame, 'BALL',
-                        (int(ball_center[0]) - 15, int(ball_center[1]) + 15),
+                        (int(_ball[0]) - 15, int(_ball[1]) + 15),
                         cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5,
                         colors[ball_color])
 
@@ -134,7 +135,9 @@ def main():
         #         print('Center: ', robot.center)
         #         print('Orientation: ', robot.orientation)
 
-        socket.send_pyobj(robots_all)
+        tmp = robots_all.copy()
+        tmp.update({"ball_center": ball_center})
+        socket.send_pyobj(tmp)
         # print(robots_all)
 
         cv2.imshow('frame', frame)

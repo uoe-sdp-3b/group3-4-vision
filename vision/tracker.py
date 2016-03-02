@@ -103,10 +103,8 @@ class BallTracker(Tracker):
         if contours is None:
             return None
         ball_contour = self.getBiggestContour(contours)
-        # print(len(contours))
 
-        print self.getContourCenter(ball_contour)
-        return self.getContourCenter(ball_contour)
+        return transformCoordstoDecartes(self.getContourCenter(ball_contour))
 
 
 class RobotTracker(Tracker):
@@ -138,6 +136,8 @@ class RobotTracker(Tracker):
                 orientation = self.getRobotOrientation(center, helper_contours,
                                                        color)
                 robots[side][color]['orientation'] = orientation
+                if center:
+                    robots[side][color]['center'] = transformCoordstoDecartes(center)
 
         return robots
 
