@@ -112,7 +112,10 @@ def main():
                     a, v = orientation
                     print(side, color, a)
                     x, y = center
-                    draw_vector = (x + v[0], y + v[1])
+                    if v is not None:
+                        draw_vector = (x + v[0], y + v[1])
+                    else:
+                        draw_vector = (0, 0)
                     x, y = transformCoordstoCV(draw_vector)
                     center = transformCoordstoCV(center)
                     #print(center)
