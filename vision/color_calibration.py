@@ -1,6 +1,5 @@
 import sys
 from camera import Camera
-from calibrate import step
 import argparse
 import math
 import os

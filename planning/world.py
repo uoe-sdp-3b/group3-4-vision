@@ -45,7 +45,7 @@ class WorldApi():
 
             if obj is not None:
                 self.thread_ready = True
-                self.world = World(obj)
+                self.world = obj
 
         socket.close()
         log.debug("Thread Closed")
@@ -55,37 +55,3 @@ class WorldApi():
         whether the world api is ready yet
         """
         return self.thread_ready
-
-    def get_allied_green(self):
-        return self.world.allied_green
-
-    def get_allied_pink(self):
-        return self.world.allied_pink
-
-    def get_opponent_green(self):
-        return self.world.green_opponent
-
-    def get_opponent_pink(self):
-        return self.world.pink_opponent
-
-    def get_ball(self):
-        return self.world.ball
-
-    def get_time(self):
-        return self.world.time
-
-
-class World():
-    """
-    Simple wrapper object to ease handling
-    """
-    def __init__(self, d):
-        try:
-            self.time = d["time"]
-            self.ball = d["ball_center"]
-            self.allied_green = d["green_ally"]
-            self.allied_pink = d["pink_ally"]
-            self.pink_opponent = d["pink_opponent"]
-            self.green_opponent = d["green_opponent"]
-        except KeyError as e:
-            log.error("Error accessing key " + e.message)
