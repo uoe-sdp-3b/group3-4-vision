@@ -18,6 +18,7 @@ class Tracker():
 
     def getContours(self, frame, color, adjustments):
 
+        color_range = get_colors()
         blur_intensity = adjustments['blur']
         blurred_frame = cv2.GaussianBlur(frame, blur_intensity, 0)
         hsv_frame = cv2.cvtColor(blurred_frame, cv2.COLOR_BGR2HSV)
@@ -85,6 +86,9 @@ class Tracker():
 
         for i in range(0, len(contours)):
             area = cv2.contourArea(contours[i])
+            tmp_contours = self.getContours(frame, color, adjustments)
+
+
             if area > max_area:
                 max_area = area
                 max_contour_position = i
@@ -112,108 +116,142 @@ class RobotTracker(Tracker):
 
         self.ally_color = ally_color
         self.side_identifiers = ['yellow', 'bright_blue']
+        self.robot_identifiers = ['pink', 'green']
+        self.all_colors = self.side_identifiers + self.robot_identifiers
 
-    def getAllRobots(self, frame):
 
-        helper_contours = {}
-        helper_contours['pink'] = self.getContours(frame, 'pink', adjustments)
-        helper_contours['green'] = self.getContours(frame, 'green',
-                                                    adjustments)
+    def groupContours(contours):
+        pass
 
-        robots = {}
-        for side_color in self.side_identifiers:
-            side_contours = self.getContours(frame, side_color, adjustments)
-            side_robots = self.getRobotCoordinates(side_contours,
-                                                   helper_contours['pink'])
-            if (side_color == self.ally_color):
-                robots['ally'] = side_robots
-            else:
-                robots['enemy'] = side_robots
+    def getRobotPositions(self, frame):
 
-        for side, side_robs in robots.iteritems():
-            for color, robot in side_robs.iteritems():
-                center = robot['center']
-                orientation = self.getRobotOrientation(center, helper_contours,
-                                                       color)
-                robots[side][color]['orientation'] = orientation
-                if center:
-                    robots[side][color]['center'] = transformCoordstoDecartes(center)
+        opposing_color = {'yellow':'bright_blue', 'bright_blue':'yellow', 'pink':'green', 'green':'pink'}
 
-        return robots
+        combinations = [(x, y) for x in self.side_identifiers for y in self.robot_identifiers]
+        all_contours = []
+        for color in self.all_colors:
+            tmp_contours = self.getContours(frame, color, adjustments)
 
-    def getRobotCoordinates(self, side_contours, pink_contours):
+            processed_contours = [(x, color) for x in self.getContourCenters(tmp_contours)]
+            all_contours += processed_contours
 
-        side_robots = {'green': {"orientation": None,
-                                 "center": None},
-                       'pink': {"orientation": None,
-                                "center": None}}
-        for contour in side_contours:
+        buckets = groupContours(all_contours)
 
-            contour_center = self.getContourCenter(contour)
-            pink_contour_count = 0
+        possibilities = [combinations] * 4
+        classified_bucket = [-1] * 4
 
-            for pink_contour in pink_contours:
-                pink_contour_center = self.getContourCenter(pink_contour)
+        changed = True
+        while changed:
+            for i in range(4):
+                num = {}
+                for color in self.all_colors:
+                    num[color] = len([x for (_, x) in A if x == color])
 
-                dist = distance(pink_contour_center, contour_center)
+                for side_color in self.side_identifiers:
 
-                if dist < 20 * 20:
-                    pink_contour_count += 1
 
-            if pink_contour_count == 1:
-                side_robots['green'] = {
-                    "center": contour_center,
-                    "orientation": None
-                }
-            elif pink_contour_count == 3:
-                side_robots['pink'] = {
-                    "center": contour_center,
-                    "orientation": None
-                }
 
-        return side_robots
+    # def getAllRobots(self, frame):
 
-    def getRobotOrientation(self, center, helper_contours, group_color):
+    #     helper_contours = {}
+    #     helper_contours['pink'] = self.getContours(frame, 'pink', adjustments)
+    #     helper_contours['green'] = self.getContours(frame, 'green',
+    #                                                 adjustments)
 
-        magnitude = 30.0
+    #     robots = {}
+    #     for side_color in self.side_identifiers:
+    #         side_contours = self.getContours(frame, side_color, adjustments)
+    #         side_robots = self.getRobotCoordinates(side_contours,
+    #                                                helper_contours['pink'])
+    #         if (side_color == self.ally_color):
+    #             robots['ally'] = side_robots
+    #         else:
+    #             robots['enemy'] = side_robots
 
-        # print(helper_contours)
+    #     for side, side_robs in robots.iteritems():
+    #         for color, robot in side_robs.iteritems():
+    #             center = robot['center']
+    #             orientation = self.getRobotOrientation(center, helper_contours,
+    #                                                    color)
+    #             robots[side][color]['orientation'] = orientation
+    #             if center:
+    #                 robots[side][color]['center'] = transformCoordstoDecartes(center)
 
-        if center is None:
-            return None, None
+    #     return robots
 
-        if group_color == 'pink':
-            main_color = 'pink'
-            support_color = 'green'
-        else:
-            main_color = 'green'
-            support_color = 'pink'
+    # def getRobotCoordinates(self, side_contours, pink_contours):
 
-        # for _, cont in helper_contours:
-        #     if cont == []:
-        #         return None, None
-        orientation_support = self.getKClosestContours(
-            1, center, helper_contours[support_color])
-        support_center = self.getContourCenter(orientation_support[0])
+    #     side_robots = {'green': {"orientation": None,
+    #                              "center": None},
+    #                    'pink': {"orientation": None,
+    #                             "center": None}}
+    #     for contour in side_contours:
 
-        orientation_main = self.getKClosestContours(
-            3, center, helper_contours[main_color])
-        orientation_main = self.getKFurthestContours(2, support_center,
-                                                     orientation_main)
+    #         contour_center = self.getContourCenter(contour)
+    #         pink_contour_count = 0
 
-        if len(orientation_main) != 2:
-            return None, None
+    #         for pink_contour in pink_contours:
+    #             pink_contour_center = self.getContourCenter(pink_contour)
 
-        main_centers = self.getContourCenters(orientation_main)
-        # print(main_centers)
-        mean_main_point = meanPoint(main_centers)
+    #             dist = distance(pink_contour_center, contour_center)
 
-        center = transformCoordstoDecartes(center)
-        mean_main_point = transformCoordstoDecartes(mean_main_point)
+    #             if dist < 20 * 20:
+    #                 pink_contour_count += 1
 
-        direction_vector = getDirectionVector(center, mean_main_point,
-                                              magnitude)
-        angle_radians = np.arctan2(direction_vector[1], direction_vector[0])
-        angle_degrees = math.degrees(angle_radians)
+    #         if pink_contour_count == 1:
+    #             side_robots['green'] = {
+    #                 "center": contour_center,
+    #                 "orientation": None
+    #             }
+    #         elif pink_contour_count == 3:
+    #             side_robots['pink'] = {
+    #                 "center": contour_center,
+    #                 "orientation": None
+    #             }
 
-        return (angle_degrees, direction_vector)
+    #     return side_robots
+
+    # def getRobotOrientation(self, center, helper_contours, group_color):
+
+    #     magnitude = 30.0
+
+    #     # print(helper_contours)
+
+    #     if center is None:
+    #         return None, None
+
+    #     if group_color == 'pink':
+    #         main_color = 'pink'
+    #         support_color = 'green'
+    #     else:
+    #         main_color = 'green'
+    #         support_color = 'pink'
+
+    #     # for _, cont in helper_contours:
+    #     #     if cont == []:
+    #     #         return None, None
+    #     orientation_support = self.getKClosestContours(
+    #         1, center, helper_contours[support_color])
+    #     support_center = self.getContourCenter(orientation_support[0])
+
+    #     orientation_main = self.getKClosestContours(
+    #         3, center, helper_contours[main_color])
+    #     orientation_main = self.getKFurthestContours(2, support_center,
+    #                                                  orientation_main)
+
+    #     if len(orientation_main) != 2:
+    #         return None, None
+
+    #     main_centers = self.getContourCenters(orientation_main)
+    #     # print(main_centers)
+    #     mean_main_point = meanPoint(main_centers)
+
+    #     center = transformCoordstoDecartes(center)
+    #     mean_main_point = transformCoordstoDecartes(mean_main_point)
+
+    #     direction_vector = getDirectionVector(center, mean_main_point,
+    #                                           magnitude)
+    #     angle_radians = np.arctan2(direction_vector[1], direction_vector[0])
+    #     angle_degrees = math.degrees(angle_radians)
+
+    #     return (angle_degrees, direction_vector)

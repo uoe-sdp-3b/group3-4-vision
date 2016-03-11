@@ -1,6 +1,8 @@
 from tracker import *
 from camera import Camera
 from algebra import *
+from update_colors import *
+
 
 import argparse
 import time
@@ -21,6 +23,11 @@ def parse_args():
                         help="Ball Colour",
                         required=True,
                         choices=["red", "blue"])
+    parser.add_argument("-p", 
+                        help="Pitch number",
+                        required=True,
+                        choices=["0","1"])
+
     #parser.add_argument("-c", help="Computer Name (useful for testing)")
 
     return parser.parse_args()
@@ -33,7 +40,7 @@ def main():
     socket.bind("tcp://*:5555")
 
     args = parse_args()
-    c = Camera()
+    c = Camera(int(args.p))
 
     frame = c.get_frame()
 
@@ -79,10 +86,26 @@ def main():
 
     # main feed controller:
     while True:
+        frame = c.get_frame()
+
+
         k = cv2.waitKey(5) & 0xFF
         if k == 27:
             break
-        frame = c.get_frame()
+
+        if previously_pressed == chr(k) and not not previously_pressed:
+            previously_pressed = ''
+            closeMask(keys[chr(k)], data)
+
+        elif not previously_pressed and chr(k) in keys:
+            previously_pressed = chr(k)
+            initTrackbars(keys[chr(k)])
+
+        elif not not previously_pressed:
+            new_data = recordValues(keys[previously_pressed], frame)
+            for col in new_data:
+                data[col] = new_data[col]
+
 
         # get robot orientations and centers, also get ball coordinates
         robots_all = None
