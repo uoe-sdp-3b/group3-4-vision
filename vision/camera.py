@@ -9,9 +9,10 @@ class Camera(object):
     """
 
 
-    def __init__(self, pitch=0, port=0):
+    def __init__(self, pitch=0, port=0, test = 0):
         self.capture = cv2.VideoCapture(port)
         self.pitch = pitch
+        self.test = test
 
     def get_frame(self, radial_dist=0):
         """
@@ -21,7 +22,10 @@ class Camera(object):
         """
         status, frame = self.capture.read()
 
-        frame = step(frame, self.pitch)
+        if self.test == 0:
+            frame = step(frame, self.pitch)
+        elif self.test == 1:
+            frame = cv2.imread('pitch0.png')
 
         return frame
 

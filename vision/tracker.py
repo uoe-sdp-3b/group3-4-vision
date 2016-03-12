@@ -39,6 +39,18 @@ class Tracker():
 
         return self.removeUselessContours(contours)
 
+
+    def getMultiColorContours(self, frame, color_list):
+        all_contours = []
+        for color in color_list:
+            tmp_contours = self.getContours(frame, color, adjustments)
+
+            # Gets the (CENTER, color) of the contours, not the list of contour object
+            processed_contours = [(x, color) for x in self.getContourCenters(tmp_contours)]
+            all_contours += processed_contours
+
+        return all_contours
+
     def removeUselessContours(self, contours):
         if contours is None:
             return None
@@ -86,7 +98,6 @@ class Tracker():
 
         for i in range(0, len(contours)):
             area = cv2.contourArea(contours[i])
-            tmp_contours = self.getContours(frame, color, adjustments)
 
 
             if area > max_area:
@@ -120,36 +131,130 @@ class RobotTracker(Tracker):
         self.all_colors = self.side_identifiers + self.robot_identifiers
 
 
-    def groupContours(contours):
-        pass
+    def groupContours(self,contour_list):
 
-    def getRobotPositions(self, frame):
+        buckets = []
+        for i in range(4):
+            buckets.append([])
+
+        l = len(contour_list)
+        processed = [False] * l
+
+        bucket_counter = 0
+        for i in range(l):
+            print "Koj kurac: ", bucket_counter
+            center, color = contour_list[i]
+            if color in self.side_identifiers:
+                buckets[bucket_counter].append( (center, color) )
+                print "USAO: ", color
+                processed[i] = True
+                for j in range(l):
+                    if i == j:
+                        continue
+                    if processed[j]:
+                        continue
+
+                    support_center, support_color = contour_list[j]
+                    dist = distance(center, support_center)
+                    if dist < 20 * 20:
+                        buckets[bucket_counter].append( (support_center, support_color) )
+                        processed[j] = True
+
+                bucket_counter += 1
+
+        for i in range(l):
+            if processed[i]:
+                continue
+            print "USAO"
+
+            center, color = contour_list[i]
+            buckets[bucket_counter].append( (center, color) )
+            for j in range(l):
+                if i == j:
+                    continue
+                if processed[j]:
+                    continue
+
+                support_center, support_color = contour_list[j]
+                dist = distance(center, support_center)
+                if dist < 30 * 30:
+                    buckets[bucket_counter].append( (support_center, support_color) )
+                    processed[j] = True
+
+            bucket_counter += 1
+
+        return (buckets, bucket_counter)
+
+
+
+    def classifyBuckets(self, buckets):
+        combinations = [(x, y) for x in self.side_identifiers for y in self.robot_identifiers]
+        possibilities = [combinations] * 4
+
+        print combinations
+        bucket_classifications = [None] * 4
 
         opposing_color = {'yellow':'bright_blue', 'bright_blue':'yellow', 'pink':'green', 'green':'pink'}
-
-        combinations = [(x, y) for x in self.side_identifiers for y in self.robot_identifiers]
-        all_contours = []
-        for color in self.all_colors:
-            tmp_contours = self.getContours(frame, color, adjustments)
-
-            processed_contours = [(x, color) for x in self.getContourCenters(tmp_contours)]
-            all_contours += processed_contours
-
-        buckets = groupContours(all_contours)
-
-        possibilities = [combinations] * 4
-        classified_bucket = [-1] * 4
-
+        # Elimination of bad classifications
         changed = True
         while changed:
+            changed = False
             for i in range(4):
                 num = {}
                 for color in self.all_colors:
-                    num[color] = len([x for (_, x) in A if x == color])
+                    num[color] = len([x for (_, x) in buckets[i] if x == color])
+                print "Robot -------> ", i
+                print num
 
                 for side_color in self.side_identifiers:
+                    if num[side_color] == 1:
+                        print "Enter"
+                        opposing_col = opposing_color[side_color]
+                        print "Pre-change: ", possibilities[i]
+                        possibilities[i] = [ (a,b) for (a,b) in possibilities[i] if a != opposing_col ]
+                        print "Post-change: ", possibilities[i]
+
+                for robot_color in self.robot_identifiers:
+                    if num[robot_color] > 1:
+                        opposing_col = opposing_color[robot_color]
+                        possibilities[i] = [ (a,b) for (a,b) in possibilities[i] if b != opposing_col ]
+
+                print ""
+
+            for i in range(4):
+                if bucket_classifications[i] is not None:
+                    continue
+
+                pos_len = len(possibilities[i])
+                if pos_len == 0:
+                    print "Bucketing is fucked up"
+                elif pos_len == 1:
+                    # This is the case that we want
+                    classification = possibilities[i][0]
+                    bucket_classifications[i] = classification
+                    for j in range(4):
+                        possibilities[j] = [x for x in possibilities[j] if x != classification]
+
+                    changed = True
+
+        return bucket_classifications
 
 
+    def getRobotPositions(self, frame):
+
+        all_contours = self.getMultiColorContours(frame, self.all_colors)
+        buckets, bucket_counter = self.groupContours(all_contours)
+        print "Bucket counter: ", bucket_counter
+        print "Buckets: "
+        for i in range(4):
+            print "Bucket ----> ", i
+            print buckets[i]
+        # for bucket in buckets:
+        #     print bucket
+
+        bucket_classifications = self.classifyBuckets(buckets)
+
+        print "Classifications: ", bucket_classifications
 
     # def getAllRobots(self, frame):
 

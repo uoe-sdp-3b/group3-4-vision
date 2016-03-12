@@ -40,7 +40,7 @@ def main():
     socket.bind("tcp://*:5555")
 
     args = parse_args()
-    c = Camera(int(args.p))
+    c = Camera(int(args.p), 0, 1)
 
     frame = c.get_frame()
 
@@ -83,6 +83,16 @@ def main():
         mate_letters = 'GREEN'
         mate_col = colors['green']
         our_mate_color = 'green_robot'''
+
+    keys = {'b':'blue',
+            'c':'bright_blue',
+            'g':'green',
+            'p':'pink',
+            'r':'red',
+            'y':'yellow'} 
+
+    previously_pressed = ''  
+    data = get_colors() 
 
     # main feed controller:
     while True:
