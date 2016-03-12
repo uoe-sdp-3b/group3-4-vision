@@ -3,6 +3,7 @@ import cv2
 import math
 from tools import *
 from algebra import *
+from array_queue import ArrayQueue
 
 adjustments = {}
 adjustments['blur'] = (11, 11)  # needs to be parametrized .. TODO
@@ -67,6 +68,7 @@ class Tracker():
         if contour is None:
             return None
         center, _ = cv2.minEnclosingCircle(contour)
+        print center
         return center
 
     # Extracts the centers of a list of contours
@@ -123,14 +125,24 @@ class BallTracker(Tracker):
 
 
 class RobotTracker(Tracker):
-    def __init__(self, ally_color='yellow'):
+    def __init__(self, ally_color='yellow', max_queue_size=20):
 
         self.ally_color = ally_color
         self.side_identifiers = ['yellow', 'bright_blue']
         self.robot_identifiers = ['pink', 'green']
         self.all_colors = self.side_identifiers + self.robot_identifiers
         self.opposing_color = {'yellow':'bright_blue', 'bright_blue':'yellow', 'pink':'green', 'green':'pink'}
+        self.previous_locations = {}
+        combinations = self.identifierCombinations()
+        for c in combinations:
+            previous_locations[c] = ArrayQueue(max_queue_size)
 
+
+
+    def identifierCombinations(self):
+        tmp = ['ally', 'enemy']
+        combinations = [ (x,y) for x in tmp for y in self.robot_identifiers]
+        return combinations
 
     def groupContours(self,contour_list):
 
@@ -259,13 +271,13 @@ class RobotTracker(Tracker):
         color_map[ally_color] = 'ally'
         color_map[self.opposing_color[ally_color]] = 'enemy'
 
-        tmp = ['ally', 'enemy']
-        combinations = [ (x,y) for x in tmp for y in self.robot_identifiers]
 
+        combinations = self.identifierCombinations()
         estimated_locations = {}
         for c in combinations:
             estimated_locations[c] = None
 
+        ''' Fill the estimated_locations where we can for sure'''
         for i in range(num_buckets):
             color_classification = bucket_classifications[i]
             real_classification = (color_map(color_classification[0]), color_classification[1])
@@ -277,10 +289,34 @@ class RobotTracker(Tracker):
             position_i = self.calculateLocation(classification, buckets[i])
             estimated_locations[real_classification] = position_i
 
+        ''' Estimate for the ones we were unable to locate '''
         for key, item in estimated_locations.iteritems():
             if item is not None:
                 continue
+            if not self.previous_locations[key].full():
+                estimated_locations[key] = None
+                continue
 
+            ''' Get the ArrayQueue(previous locations) for robot with the 'key' identifier '''
+            points_queue = self.previous_locations[key]
+            trajectory_vector = linear_regression(points_queue)
+            speed = self.getSpeed(key)
+
+
+    ''' Measures speed in distance/frame '''
+    def getSpeed(self, key):
+
+        points_queue = self.previous_locations[key]
+        if not points_queue.full():
+            return None
+
+        beginning_p = points_queue.getRight()
+        end_p = points_queue.getLeft()
+
+        size = points_queue.getMaxSize()
+        speed = distance(beginning_p, end_p) ** (0.5) / size
+
+        return speed
 
 
     def getRobotParameters(self, frame):
