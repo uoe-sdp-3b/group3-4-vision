@@ -129,6 +129,7 @@ class RobotTracker(Tracker):
         self.side_identifiers = ['yellow', 'bright_blue']
         self.robot_identifiers = ['pink', 'green']
         self.all_colors = self.side_identifiers + self.robot_identifiers
+        self.opposing_color = {'yellow':'bright_blue', 'bright_blue':'yellow', 'pink':'green', 'green':'pink'}
 
 
     def groupContours(self,contour_list):
@@ -186,7 +187,6 @@ class RobotTracker(Tracker):
         return (buckets, bucket_counter)
 
 
-
     def classifyBuckets(self, buckets):
         combinations = [(x, y) for x in self.side_identifiers for y in self.robot_identifiers]
         possibilities = [combinations] * 4
@@ -194,7 +194,6 @@ class RobotTracker(Tracker):
         print combinations
         bucket_classifications = [None] * 4
 
-        opposing_color = {'yellow':'bright_blue', 'bright_blue':'yellow', 'pink':'green', 'green':'pink'}
         # Elimination of bad classifications
         changed = True
         while changed:
@@ -209,14 +208,14 @@ class RobotTracker(Tracker):
                 for side_color in self.side_identifiers:
                     if num[side_color] == 1:
                         print "Enter"
-                        opposing_col = opposing_color[side_color]
+                        opposing_col = self.opposing_color[side_color]
                         print "Pre-change: ", possibilities[i]
                         possibilities[i] = [ (a,b) for (a,b) in possibilities[i] if a != opposing_col ]
                         print "Post-change: ", possibilities[i]
 
                 for robot_color in self.robot_identifiers:
                     if num[robot_color] > 1:
-                        opposing_col = opposing_color[robot_color]
+                        opposing_col = self.opposing_color[robot_color]
                         possibilities[i] = [ (a,b) for (a,b) in possibilities[i] if b != opposing_col ]
 
                 print ""
@@ -240,7 +239,51 @@ class RobotTracker(Tracker):
         return bucket_classifications
 
 
-    def getRobotPositions(self, frame):
+    def gradientDescent(bucket):
+        pass
+
+    def calculateLocation(self, classification, bucket):
+
+        # Can only happen if >= 2 contours in the bucket
+
+        for center, color in bucket:
+            if color in self.side_identifiers:
+                return center
+
+        return gradientDescent(bucket)
+
+
+    def estimatePositions(self, buckets, bucket_classifications, num_buckets):
+
+        color_map = {}
+        color_map[ally_color] = 'ally'
+        color_map[self.opposing_color[ally_color]] = 'enemy'
+
+        tmp = ['ally', 'enemy']
+        combinations = [ (x,y) for x in tmp for y in self.robot_identifiers]
+
+        estimated_locations = {}
+        for c in combinations:
+            estimated_locations[c] = None
+
+        for i in range(num_buckets):
+            color_classification = bucket_classifications[i]
+            real_classification = (color_map(color_classification[0]), color_classification[1])
+            if classification is None:
+                continue
+            if len(buckets[i]) <= 1:
+                continue
+
+            position_i = self.calculateLocation(classification, buckets[i])
+            estimated_locations[real_classification] = position_i
+
+        for key, item in estimated_locations.iteritems():
+            if item is not None:
+                continue
+
+
+
+    def getRobotParameters(self, frame):
 
         all_contours = self.getMultiColorContours(frame, self.all_colors)
         buckets, bucket_counter = self.groupContours(all_contours)
@@ -255,6 +298,8 @@ class RobotTracker(Tracker):
         bucket_classifications = self.classifyBuckets(buckets)
 
         print "Classifications: ", bucket_classifications
+
+
 
     # def getAllRobots(self, frame):
 
