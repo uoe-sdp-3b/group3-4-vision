@@ -6,7 +6,6 @@ from algebra import *
 
 adjustments = {}
 adjustments['blur'] = (11, 11)  # needs to be parametrized .. TODO
-color_range = get_colors()  # for PITCH=0
 
 
 class Tracker():
@@ -17,7 +16,7 @@ class Tracker():
         return po
 
     def getContours(self, frame, color, adjustments):
-
+        color_range = get_colors()  # for PITCH=0
         blur_intensity = adjustments['blur']
         blurred_frame = cv2.GaussianBlur(frame, blur_intensity, 0)
         hsv_frame = cv2.cvtColor(blurred_frame, cv2.COLOR_BGR2HSV)

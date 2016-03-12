@@ -5,7 +5,7 @@ from algebra import *
 import argparse
 import time
 import zmq
-
+from update_colors import *
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -76,13 +76,39 @@ def main():
         mate_letters = 'GREEN'
         mate_col = colors['green']
         our_mate_color = 'green_robot'''
-
+    
+    keys = {'b':'blue',
+        'c':'bright_blue',
+        'g':'green',
+        'p':'pink',
+        'r':'red',
+        'y':'yellow'} 
+    
+    previously_pressed = ''  
+    data = get_colors() 
+    
     # main feed controller:
     while True:
+        frame = c.get_frame()
+        
         k = cv2.waitKey(5) & 0xFF
         if k == 27:
             break
-        frame = c.get_frame()
+
+        if previously_pressed == chr(k) and not not previously_pressed:
+            previously_pressed = ''
+            closeMask(keys[chr(k)], data)
+
+        elif not previously_pressed and chr(k) in keys:
+            previously_pressed = chr(k)
+            initTrackbars(keys[chr(k)])
+
+        elif not not previously_pressed:
+            new_data = recordValues(keys[previously_pressed], frame)
+            if data is not None:    
+                for col in new_data:
+                    data[col] = new_data[col]
+
 
         # get robot orientations and centers, also get ball coordinates
         robots_all = None
