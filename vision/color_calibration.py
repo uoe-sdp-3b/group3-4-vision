@@ -162,7 +162,7 @@ and returns dictionary with calibrated thresholds
 def calibrateThresholds(pitch):
 
     # keys: blue, pink, maroon, green, yellow, bright_blue, red
-    c = Camera(pitch, 0, 1)
+    c = Camera(pitch, 0, 0)
     thresholds = getThresholds(pitch, c)
     calibrated_thresholds = {}
     
