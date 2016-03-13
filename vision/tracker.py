@@ -134,9 +134,15 @@ class RobotTracker(Tracker):
         self.all_colors = self.side_identifiers + self.robot_identifiers
         self.opposing_color = {'yellow':'bright_blue', 'bright_blue':'yellow', 'pink':'green', 'green':'pink'}
         self.previous_locations = {}
+        self.previous_orientations = {}
         combinations = self.identifierCombinations()
         for c in combinations:
             self.previous_locations[c] = ArrayQueue(max_queue_size)
+        for c in combinations:
+            self.previous_orientations[c] = ArrayQueue(max_queue_size)
+        self.color_map = {}
+        self.color_map[self.ally_color] = 'ally'
+        self.color_map[self.opposing_color[self.ally_color]] = 'enemy'
 
 
 
@@ -244,6 +250,8 @@ class RobotTracker(Tracker):
 
 
     def gradientDescent(self, bucket):
+
+        ''' needs some more thinking, not sure if an actual gradient descent is superior '''
         points = [x for (x, _) in bucket]
 
         return meanPoint(points)
@@ -262,9 +270,6 @@ class RobotTracker(Tracker):
 
     def estimatePositions(self, buckets, bucket_classifications, num_buckets):
 
-        color_map = {}
-        color_map[self.ally_color] = 'ally'
-        color_map[self.opposing_color[self.ally_color]] = 'enemy'
 
 
         combinations = self.identifierCombinations()
@@ -280,12 +285,12 @@ class RobotTracker(Tracker):
             if len(buckets[i]) <= 1:
                 continue
 
-            real_classification = (color_map[color_classification[0]], color_classification[1])
+            real_classification = (self.color_map[color_classification[0]], color_classification[1])
 
             position_i = self.calculateLocation(real_classification, buckets[i])
             estimated_locations[real_classification] = position_i
-            print "Classification i: ", real_classification
-            print "Position i: ", position_i
+            # print "Classification i: ", real_classification
+            # print "Position i: ", position_i
 
         ''' Estimate for the ones we were unable to locate '''
         for key, item in estimated_locations.iteritems():
@@ -326,6 +331,113 @@ class RobotTracker(Tracker):
         return speed
 
 
+    def estimateOrientations(self, buckets, bucket_classifications, num_buckets, estimated_positions):
+
+        combinations = self.identifierCombinations()
+        estimated_orientations = {}
+        for c in combinations:
+            estimated_orientations[c] = None, None
+
+        for key, center in estimated_positions.iteritems():
+            # print "Key:", key
+            if center is None:
+                estimated_orientations[key] = None
+                continue
+            side_color, main_color = key
+            support_color = self.opposing_color[main_color]
+
+
+            support_orientation_vector = None
+            final_vector = None
+
+            if self.previous_orientations[key].full():
+                support_orientation_vector = self.previous_orientations[key].getLeft()
+
+            bucket_index = self.findBucket(buckets, bucket_classifications, key, num_buckets)
+            if bucket_index == -1:
+                final_vector = support_orientation_vector
+                self.updateOrientations(estimated_orientations, final_vector, key)
+                continue
+
+
+            for bucket_center, bucket_color in buckets[bucket_index]:
+                if bucket_color == support_color:
+                    support_orientation_vector = Vector.getDirectionVector( bucket_center, center, 1 )
+                    support_orientation_vector.rotate(math.radians(215))
+
+            if support_orientation_vector is None:
+                final_vector = None
+                self.updateOrientations(estimated_orientations, final_vector, key)
+                continue
+
+            centers_main_color = [ x for (x, c) in buckets[bucket_index] if c == main_color ]
+            centers_len = len(centers_main_color)
+
+            midpoints_main_color = []
+            for i in range(centers_len - 1):
+                for j in range(i+1, centers_len):
+                    center_i = centers_main_color[i]
+                    center_j = centers_main_color[j]
+                    midpoints_main_color.append( meanPoint([center_i, center_j]) )
+
+            dvs_main_color = [ Vector.getDirectionVector(x, center, 10) for x in midpoints_main_color]
+            dvs_len = len(dvs_main_color)
+
+            if dvs_len < 2:
+                final_vector = support_orientation_vector
+                self.updateOrientations(estimated_orientations, final_vector, key)
+                continue
+
+
+
+            angle_min = 999999
+            vector_min = None
+            for v in dvs_main_color:
+                angle_tmp = abs(Vector.angleBetween(support_orientation_vector, v))
+                if angle_tmp < angle_min:
+                    angle_min = angle_tmp
+                    vector_min = v
+
+            angle_check = abs(Vector.angleBetween(vector_min, support_orientation_vector))
+            if angle_check < 20:
+                final_vector = vector_min
+            else:
+                final_vector = support_orientation_vector
+
+            # final_vector = support_orientation_vector
+            # final_vector.rotate(180)
+            self.updateOrientations(estimated_orientations, final_vector, key)
+
+
+        return estimated_orientations
+
+
+    def findBucket(self, buckets, bucket_classifications, key, numbuckets):
+
+        real_classification_tmp = [ (self.color_map[x], y) for (x,y) in bucket_classifications ]
+        for index, bucket_key in zip([i for i in range(numbuckets)], real_classification_tmp):
+            if bucket_key == key:
+                return index
+
+        return -1
+
+
+
+    def updateOrientations(self, estimated_orientations, v, key):
+
+        if v is None:
+            estimated_orientations[key] = None, None
+            return
+
+        tmp = v.toPoint()
+        tmp = transformCoordstoDecartes( tmp )
+        angle_radians = np.arctan2(tmp[1], tmp[0])
+        angle_degrees = math.degrees(angle_radians)
+
+        estimated_orientations[key] = v, angle_degrees
+
+
+
     def getRobotParameters(self, frame):
 
         all_contours = self.getMultiColorContours(frame, self.all_colors)
@@ -339,14 +451,23 @@ class RobotTracker(Tracker):
         #     print bucket
 
         bucket_classifications = self.classifyBuckets(buckets)
-
         estimated_locations = self.estimatePositions(buckets, bucket_classifications, bucket_counter)
+        estimated_orientations = self.estimateOrientations(buckets, bucket_classifications, bucket_counter, estimated_locations)
 
         # print "Classifications: ", bucket_classifications
 
-        print estimated_locations
-        return estimated_locations
+        # print "Locations: ", estimated_locations
+        # print "Orientations: ", estimated_orientations
 
+        robots_all = {}
+        for key in self.identifierCombinations():
+            robots_all[key] = {}
+
+        for key in self.identifierCombinations():
+            robots_all[key]['center'] = estimated_locations[key]
+            robots_all[key]['orientation'] = estimated_orientations[key]
+
+        return robots_all
 
 
     # def getAllRobots(self, frame):

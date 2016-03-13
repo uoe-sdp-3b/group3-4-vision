@@ -123,7 +123,7 @@ def main():
         try:
             ball_center = ball_tracker.getBallCoordinates(frame)
             robots_all = robot_tracker.getRobotParameters(frame)
-            print robots_all
+            # print robots_all
         except ValueError:
             print("Exception calculating ball")
             raise
@@ -138,10 +138,9 @@ def main():
                         colors[ball_color])
 
 
-        for (side, color) , side_robs in robots_all.iteritems():
-            center = robots_all[(side, color)]
-            # orientation = robots_all[side][color]['orientation']
-            orientation = [1,1]
+        for (side, color) in robot_tracker.identifierCombinations():
+            center = robots_all[(side, color)]['center']
+            orientation = robots_all[(side, color)]['orientation']
             if (center is not None):
                 # a, v = orientation
                 # print(side, color, a)
@@ -166,6 +165,23 @@ def main():
                                                 int(center[1]) + 40),
                             cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0,0,255))
 
+            if (orientation is not None):
+                v, a = orientation
+                v.rescale(100)
+                # print(side, color, a)
+                x, y = center
+                if v is not None:
+                    # print "Jel neki nije none jebem mu sve"
+                    # print "SFGFSGFGF:", (v.x, v.y)
+                    draw_vector = (x + v.x, y + v.y)
+                else:
+                    draw_vector = (0, 0)
+                # x, y = transformCoordstoCV(draw_vector)
+                # center = transformCoordstoCV(center)
+                # print(center)
+                cv2.line(frame,
+                        (int(center[0]), int(center[1])),
+                        (int(draw_vector[0]), int(draw_vector[1])), (0, 0, 255), 2)
 
         # for side, side_robs in robots_all.iteritems():
         #     for color, robot in side_robs.iteritems():
