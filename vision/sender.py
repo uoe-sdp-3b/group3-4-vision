@@ -14,7 +14,7 @@ def parse_args():
     parser.add_argument("-t",
                         help="Our Team Colour",
                         required=True,
-                        choices=["yellow", "light_blue"])
+                        choices=["yellow", "bright_blue"])
     '''parser.add_argument("-d",
                         help="Number of dots",
                         required=True,
@@ -40,17 +40,9 @@ def main():
     socket.bind("tcp://*:5555")
 
     args = parse_args()
-    c = Camera(int(args.p), 0, 0)
+    c = Camera(int(args.p), 0, 1)
 
     frame = c.get_frame()
-
-    colors = {}
-    colors['yellow'] = (0, 255, 255)
-    colors['light_blue'] = (255, 255, 0)
-    colors['pink'] = (127, 0, 255)
-    colors['green'] = (0, 255, 0)
-    colors['red'] = (0, 0, 255)
-    colors['blue'] = (255, 0, 0)
 
     our_team_color = args.t
     #num_of_pink = args.d
@@ -62,28 +54,11 @@ def main():
     ball_tracker = BallTracker(ball_color)
 
     # convert string colors into GBR
-    '''our_circle_color = colors[our_team_color]
-    if our_team_color == 'yellow':
-        opponent_circle_color = colors['light_blue']
-    else:
-        opponent_circle_color = colors['yellow']'''
 
-    # assign colors and names to the robots
-    '''if int(num_of_pink) == 1:
-        our_letters = 'GREEN'
-        our_col = colors['green']
-        our_robot_color = 'green_robot'
-        mate_letters = 'PINK'
-        mate_col = colors['pink']
-        our_mate_color = 'pink_robot'
-    else:
-        our_letters = 'PINK'
-        our_col = colors['pink']
-        our_robot_color = 'pink_robot'
-        mate_letters = 'GREEN'
-        mate_col = colors['green']
-        our_mate_color = 'green_robot'''
-
+    colors = {}
+    colors['red'] = (0, 0, 255)
+    colors['blue'] = (255, 0, 0)
+    
     keys = {'b':'blue',
             'c':'bright_blue',
             'g':'green',
@@ -97,15 +72,11 @@ def main():
     # main feed controller:
     while True:
         frame = c.get_frame()
-
-
         k = cv2.waitKey(5) & 0xFF
-        if k == 27:
-            break
 
-        if previously_pressed == chr(k) and not not previously_pressed:
+        if ((previously_pressed == chr(k) or k == 27) and not not previously_pressed):
+            closeMask(keys[previously_pressed], data)
             previously_pressed = ''
-            closeMask(keys[chr(k)], data)
 
         elif not previously_pressed and chr(k) in keys:
             previously_pressed = chr(k)
@@ -116,6 +87,8 @@ def main():
             for col in new_data:
                 data[col] = new_data[col]
 
+        elif k == 27:
+            break            
 
         # get robot orientations and centers, also get ball coordinates
         robots_all = None
@@ -142,19 +115,6 @@ def main():
             center = robots_all[(side, color)]['center']
             orientation = robots_all[(side, color)]['orientation']
             if (center is not None):
-                # a, v = orientation
-                # print(side, color, a)
-                # x, y = center
-                # if v is not None:
-                #     draw_vector = (x + v[0], y + v[1])
-                # else:
-                #     draw_vector = (0, 0)
-                # x, y = transformCoordstoCV(draw_vector)
-                # center = transformCoordstoCV(center)
-                #print(center)
-                # cv2.line(frame,
-                #         (int(center[0]), int(center[1])),
-                #         (int(x), int(y)), (0, 0, 255), 2)
                 cv2.circle(frame,
                         (int(center[0]),
                             int(center[1])), 20, (0,0,255), 2)
@@ -168,30 +128,20 @@ def main():
             if (orientation is not None):
                 v, a = orientation
                 v.rescale(100)
-                # print(side, color, a)
                 x, y = center
                 if v is not None:
-                    # print "Jel neki nije none jebem mu sve"
-                    # print "SFGFSGFGF:", (v.x, v.y)
+
                     draw_vector = (x + v.x, y + v.y)
                 else:
                     draw_vector = (0, 0)
-                # x, y = transformCoordstoCV(draw_vector)
-                # center = transformCoordstoCV(center)
-                # print(center)
+
                 cv2.line(frame,
                         (int(center[0]), int(center[1])),
                         (int(draw_vector[0]), int(draw_vector[1])), (0, 0, 255), 2)
 
-        # for side, side_robs in robots_all.iteritems():
-        #     for color, robot in side_robs.iteritems():
-        #         print('Center: ', robot.center)
-        #         print('Orientation: ', robot.orientation)
-
         tmp = robots_all.copy()
         tmp.update({"ball_center": ball_center})
         socket.send_pyobj(tmp)
-        # print(robots_all)
 
         cv2.imshow('frame', frame)
 

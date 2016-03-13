@@ -17,7 +17,10 @@ redSliders = {'red' :{'H low red ':['min',0,180],
                     'S low maroon':['min',1,255],
                     'V low maroon':['min',2,255]
                 }
-            }      
+            }  
+keys = ['H low','H high', 'S low', 'V low']
+redKeys = ['H low red ','H high red','S low red','V low red']
+meroonKeys = ['H low maroon ','H high maroon','S low maroon','V low maroon']               
 
 def nothing(x):
     pass                
@@ -33,16 +36,16 @@ def initTrackbars(color):
     cv2.namedWindow(color)
 
     if color is 'red':
-        for name in redSliders['red']:
+        for name in redKeys:
             num = redSliders['red'][name][1]
             cv2.createTrackbar(name,color,int(colors[color][redSliders['red'][name][0]][num]),redSliders['red'][name][2],nothing)
         
-        for name in redSliders['maroon']:
+        for name in maroonKeys:
             num = redSliders['maroon'][name][1]
             cv2.createTrackbar(name,color,int(colors['maroon'][redSliders['maroon'][name][0]][num]),redSliders['maroon'][name][2],nothing)
    
     else:
-        for name in sliders:
+        for name in keys:
             num = sliders[name][1]
             cv2.createTrackbar(name,color,int(colors[color][sliders[name][0]][num]),sliders[name][2],nothing)
 

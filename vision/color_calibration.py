@@ -103,7 +103,7 @@ getThresholds() automatically thresholds colors only by clicking on the current 
 Function returns 'hsv_range' - dictionary that contains all needed thresholds
 for these colors: red, maroon, green (aka bright_green), pink, yellow, blue and light_blue
 '''
-def getThresholds(pitch):
+def getThresholds(pitch, camera):
     global color
     global img
     hsv_range = {}
@@ -116,9 +116,9 @@ def getThresholds(pitch):
     print "Once done with obtaining pixel values, pres ESC to proceed."
     cv2.namedWindow('image')
     cv2.setMouseCallback('image',getColorValues)
-    c = Camera(pitch)
+
     while(1):
-        img = c.get_frame()
+        img = camera.get_frame()
         cv2.imshow('image',img)
 
         k = cv2.waitKey(1) & 0xFF
@@ -147,7 +147,6 @@ def getThresholds(pitch):
 
     print "Destroying all windows"        
     cv2.destroyAllWindows()
-    c.close()
     print "Averaging BGR values..."
     for colors in bgr:
         if (len(bgr[colors]) != 0):
@@ -163,9 +162,10 @@ and returns dictionary with calibrated thresholds
 def calibrateThresholds(pitch):
 
     # keys: blue, pink, maroon, green, yellow, bright_blue, red
-    thresholds = getThresholds(pitch)
+    c = Camera(pitch, 0, 1)
+    thresholds = getThresholds(pitch, c)
     calibrated_thresholds = {}
-    c = Camera(pitch)
+    
 
     for colors in thresholds:
         if colors != 'red' and colors != 'maroon': 
