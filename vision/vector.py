@@ -60,7 +60,7 @@ class Vector():
         diff_y = cy_d - oy_d
 
         if diff_x == 0:
-            return (0, -diff_x)
+            return Vector(0, -diff_y)
 
         # k = diff_y / diff_x
         # if ox_d >= cx_d :

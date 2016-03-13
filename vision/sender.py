@@ -40,7 +40,7 @@ def main():
     socket.bind("tcp://*:5555")
 
     args = parse_args()
-    c = Camera(int(args.p), 0, 1)
+    c = Camera(int(args.p), 0, 0)
 
     frame = c.get_frame()
 

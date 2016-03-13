@@ -154,7 +154,7 @@ class RobotTracker(Tracker):
     def groupContours(self,contour_list):
 
         buckets = []
-        for i in range(4):
+        for i in range(100):
             buckets.append([])
 
         l = len(contour_list)
@@ -393,6 +393,7 @@ class RobotTracker(Tracker):
             angle_min = 999999
             vector_min = None
             for v in dvs_main_color:
+                print v
                 angle_tmp = abs(Vector.angleBetween(support_orientation_vector, v))
                 if angle_tmp < angle_min:
                     angle_min = angle_tmp
@@ -414,7 +415,18 @@ class RobotTracker(Tracker):
 
     def findBucket(self, buckets, bucket_classifications, key, numbuckets):
 
-        real_classification_tmp = [ (self.color_map[x], y) for (x,y) in bucket_classifications ]
+        print bucket_classifications
+        if bucket_classifications is None:
+            return -1
+        # real_classification_tmp = [ (self.color_map[x], y) for (x,y) in bucket_classifications ]
+        real_classification_tmp = []
+        for c in bucket_classifications:
+            if c is None:
+                real_classification_tmp.append(None)
+                continue
+            x,y = c
+            real_classification_tmp.append((self.color_map[x], y))
+
         for index, bucket_key in zip([i for i in range(numbuckets)], real_classification_tmp):
             if bucket_key == key:
                 return index
