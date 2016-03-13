@@ -4,6 +4,7 @@ import math
 from tools import *
 from algebra import *
 from array_queue import ArrayQueue
+from vector import Vector
 
 adjustments = {}
 adjustments['blur'] = (11, 11)  # needs to be parametrized .. TODO
@@ -68,7 +69,7 @@ class Tracker():
         if contour is None:
             return None
         center, _ = cv2.minEnclosingCircle(contour)
-        print center
+        # print center
         return center
 
     # Extracts the centers of a list of contours
@@ -135,7 +136,7 @@ class RobotTracker(Tracker):
         self.previous_locations = {}
         combinations = self.identifierCombinations()
         for c in combinations:
-            previous_locations[c] = ArrayQueue(max_queue_size)
+            self.previous_locations[c] = ArrayQueue(max_queue_size)
 
 
 
@@ -155,11 +156,9 @@ class RobotTracker(Tracker):
 
         bucket_counter = 0
         for i in range(l):
-            print "Koj kurac: ", bucket_counter
             center, color = contour_list[i]
             if color in self.side_identifiers:
                 buckets[bucket_counter].append( (center, color) )
-                print "USAO: ", color
                 processed[i] = True
                 for j in range(l):
                     if i == j:
@@ -178,7 +177,6 @@ class RobotTracker(Tracker):
         for i in range(l):
             if processed[i]:
                 continue
-            print "USAO"
 
             center, color = contour_list[i]
             buckets[bucket_counter].append( (center, color) )
@@ -203,7 +201,7 @@ class RobotTracker(Tracker):
         combinations = [(x, y) for x in self.side_identifiers for y in self.robot_identifiers]
         possibilities = [combinations] * 4
 
-        print combinations
+        # print combinations
         bucket_classifications = [None] * 4
 
         # Elimination of bad classifications
@@ -214,23 +212,17 @@ class RobotTracker(Tracker):
                 num = {}
                 for color in self.all_colors:
                     num[color] = len([x for (_, x) in buckets[i] if x == color])
-                print "Robot -------> ", i
-                print num
 
                 for side_color in self.side_identifiers:
                     if num[side_color] == 1:
-                        print "Enter"
                         opposing_col = self.opposing_color[side_color]
-                        print "Pre-change: ", possibilities[i]
                         possibilities[i] = [ (a,b) for (a,b) in possibilities[i] if a != opposing_col ]
-                        print "Post-change: ", possibilities[i]
 
                 for robot_color in self.robot_identifiers:
                     if num[robot_color] > 1:
                         opposing_col = self.opposing_color[robot_color]
                         possibilities[i] = [ (a,b) for (a,b) in possibilities[i] if b != opposing_col ]
 
-                print ""
 
             for i in range(4):
                 if bucket_classifications[i] is not None:
@@ -251,8 +243,11 @@ class RobotTracker(Tracker):
         return bucket_classifications
 
 
-    def gradientDescent(bucket):
-        pass
+    def gradientDescent(self, bucket):
+        points = [x for (x, _) in bucket]
+
+        return meanPoint(points)
+
 
     def calculateLocation(self, classification, bucket):
 
@@ -262,14 +257,14 @@ class RobotTracker(Tracker):
             if color in self.side_identifiers:
                 return center
 
-        return gradientDescent(bucket)
+        return self.gradientDescent(bucket)
 
 
     def estimatePositions(self, buckets, bucket_classifications, num_buckets):
 
         color_map = {}
-        color_map[ally_color] = 'ally'
-        color_map[self.opposing_color[ally_color]] = 'enemy'
+        color_map[self.ally_color] = 'ally'
+        color_map[self.opposing_color[self.ally_color]] = 'enemy'
 
 
         combinations = self.identifierCombinations()
@@ -280,14 +275,17 @@ class RobotTracker(Tracker):
         ''' Fill the estimated_locations where we can for sure'''
         for i in range(num_buckets):
             color_classification = bucket_classifications[i]
-            real_classification = (color_map(color_classification[0]), color_classification[1])
-            if classification is None:
+            if color_classification is None:
                 continue
             if len(buckets[i]) <= 1:
                 continue
 
-            position_i = self.calculateLocation(classification, buckets[i])
+            real_classification = (color_map[color_classification[0]], color_classification[1])
+
+            position_i = self.calculateLocation(real_classification, buckets[i])
             estimated_locations[real_classification] = position_i
+            print "Classification i: ", real_classification
+            print "Position i: ", position_i
 
         ''' Estimate for the ones we were unable to locate '''
         for key, item in estimated_locations.iteritems():
@@ -300,7 +298,16 @@ class RobotTracker(Tracker):
             ''' Get the ArrayQueue(previous locations) for robot with the 'key' identifier '''
             points_queue = self.previous_locations[key]
             trajectory_vector = linear_regression(points_queue)
+            trajectory_vector.rescale(1)
             speed = self.getSpeed(key)
+            dislocation = Vector.scalarMultiple(trajectory_vector, speed)
+
+            prev_location = points_queue.getLeft()
+            position_key = Vector.addToPoint( prev_location, dislocation )
+
+            estimated_locations[key] = position_key
+
+        return estimated_locations
 
 
     ''' Measures speed in distance/frame '''
@@ -323,17 +330,22 @@ class RobotTracker(Tracker):
 
         all_contours = self.getMultiColorContours(frame, self.all_colors)
         buckets, bucket_counter = self.groupContours(all_contours)
-        print "Bucket counter: ", bucket_counter
-        print "Buckets: "
-        for i in range(4):
-            print "Bucket ----> ", i
-            print buckets[i]
+        # print "Bucket counter: ", bucket_counter
+        # print "Buckets: "
+        # for i in range(4):
+        #     print "Bucket ----> ", i
+        #     print buckets[i]
         # for bucket in buckets:
         #     print bucket
 
         bucket_classifications = self.classifyBuckets(buckets)
 
-        print "Classifications: ", bucket_classifications
+        estimated_locations = self.estimatePositions(buckets, bucket_classifications, bucket_counter)
+
+        # print "Classifications: ", bucket_classifications
+
+        print estimated_locations
+        return estimated_locations
 
 
 

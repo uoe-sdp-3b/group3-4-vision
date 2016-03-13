@@ -23,7 +23,7 @@ def parse_args():
                         help="Ball Colour",
                         required=True,
                         choices=["red", "blue"])
-    parser.add_argument("-p", 
+    parser.add_argument("-p",
                         help="Pitch number",
                         required=True,
                         choices=["0","1"])
@@ -89,10 +89,10 @@ def main():
             'g':'green',
             'p':'pink',
             'r':'red',
-            'y':'yellow'} 
+            'y':'yellow'}
 
-    previously_pressed = ''  
-    data = get_colors() 
+    previously_pressed = ''
+    data = get_colors()
 
     # main feed controller:
     while True:
@@ -122,7 +122,8 @@ def main():
         ball_centre = None
         try:
             ball_center = ball_tracker.getBallCoordinates(frame)
-            robots_all = robot_tracker.getAllRobots(frame)
+            robots_all = robot_tracker.getRobotParameters(frame)
+            print robots_all
         except ValueError:
             print("Exception calculating ball")
             raise
@@ -137,33 +138,33 @@ def main():
                         colors[ball_color])
 
 
-        for side, side_robs in robots_all.iteritems():
-            for color, robot in side_robs.iteritems():
-                center = robots_all[side][color]['center']
-                orientation = robots_all[side][color]['orientation']
-                if (orientation is not None) and (center is not None):
-                    a, v = orientation
-                    print(side, color, a)
-                    x, y = center
-                    if v is not None:
-                        draw_vector = (x + v[0], y + v[1])
-                    else:
-                        draw_vector = (0, 0)
-                    x, y = transformCoordstoCV(draw_vector)
-                    center = transformCoordstoCV(center)
-                    #print(center)
-                    cv2.line(frame,
-                            (int(center[0]), int(center[1])),
-                            (int(x), int(y)), (0, 0, 255), 2)
-                    cv2.circle(frame,
-                            (int(center[0]),
-                                int(center[1])), 20, (0,0,255), 2)
-                    cv2.putText(frame, side, (int(center[0]) - 15,
-                                            int(center[1]) + 30),
-                                cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0,0,255))
-                    cv2.putText(frame, color, (int(center[0]) - 20,
-                                                    int(center[1]) + 40),
-                                cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0,0,255))
+        for (side, color) , side_robs in robots_all.iteritems():
+            center = robots_all[(side, color)]
+            # orientation = robots_all[side][color]['orientation']
+            orientation = [1,1]
+            if (center is not None):
+                # a, v = orientation
+                # print(side, color, a)
+                # x, y = center
+                # if v is not None:
+                #     draw_vector = (x + v[0], y + v[1])
+                # else:
+                #     draw_vector = (0, 0)
+                # x, y = transformCoordstoCV(draw_vector)
+                # center = transformCoordstoCV(center)
+                #print(center)
+                # cv2.line(frame,
+                #         (int(center[0]), int(center[1])),
+                #         (int(x), int(y)), (0, 0, 255), 2)
+                cv2.circle(frame,
+                        (int(center[0]),
+                            int(center[1])), 20, (0,0,255), 2)
+                cv2.putText(frame, side, (int(center[0]) - 15,
+                                        int(center[1]) + 30),
+                            cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0,0,255))
+                cv2.putText(frame, color, (int(center[0]) - 20,
+                                                int(center[1]) + 40),
+                            cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0,0,255))
 
 
         # for side, side_robs in robots_all.iteritems():
