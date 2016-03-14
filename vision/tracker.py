@@ -211,10 +211,10 @@ class RobotTracker(Tracker):
 
     def classifyBuckets(self, buckets):
         combinations = [(x, y) for x in self.side_identifiers for y in self.robot_identifiers]
-        possibilities = [combinations] * 4
 
         # print combinations
         num_buckets = len(buckets)
+        possibilities = [combinations] * num_buckets
         bucket_classifications = [None] * num_buckets
 
         classifications_done = 0
