@@ -154,7 +154,7 @@ class RobotTracker(Tracker):
     def groupContours(self,contour_list):
 
         buckets = []
-        for i in range(100):
+        for i in range(4):
             buckets.append([])
 
         l = len(contour_list)
@@ -181,6 +181,11 @@ class RobotTracker(Tracker):
                 bucket_counter += 1
 
         for i in range(l):
+
+            if bucket_counter == 5:
+                bucket_counter = 4
+                break
+
             if processed[i]:
                 continue
 
