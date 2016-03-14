@@ -2,7 +2,7 @@ import cv2
 import cPickle
 import numpy as np
 
-img = cv2.imread('example_img.png')
+img = cv2.imread('perspective.png')
 data = []
 filename = open('points_p1.txt', 'r+')
 

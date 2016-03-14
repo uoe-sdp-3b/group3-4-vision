@@ -20,7 +20,7 @@ absPathToJson = PATH+'/config/undistort.json'
 pitches = util.read_json(absPathToJson)
 
 
-def step(frame, pitch = 0):
+def step(frame, pitch=0):
     frame = undistort(frame, pitch)
     frame = perspective(frame, pitch)
     frame = translate(frame, pitch)
@@ -37,8 +37,9 @@ def pitch_to_numpy(pitch=0):
 ''' Scale center '''
 def translate(frame, pitch=0):
     if pitch == 0:
-        M = np.float32([[1,0,-5],[0,1,-5]])
-        return cv2.warpAffine(frame, M, (640,480))
+        #M = np.float32([[1,0,-5],[0,1,-5]])
+        #return cv2.warpAffine(frame, M, (640,480))
+        return frame
     else: 
         return frame      
 
@@ -53,7 +54,8 @@ def undistort(frame, pitch_num=0):
 ''' Rotate '''
 def warp(frame,pitch=0):
     if pitch == 0: 
-        return frame
+        M = cv2.getRotationMatrix2D((COLS/2, ROWS/2), 1, 1)
+        return cv2.warpAffine(frame, M, (COLS, ROWS))
     else:
         M = cv2.getRotationMatrix2D((COLS/2, ROWS/2), 0, 1)
         return cv2.warpAffine(frame, M, (COLS, ROWS))
@@ -61,7 +63,11 @@ def warp(frame,pitch=0):
 def perspective(frame, pitch=0):
 
     if pitch == 0:
-        return frame
+        pts1 = np.float32([[0,0],[13,478],[640,480],[640,0]])
+        pts2 = np.float32([[0,0],[0,480],[640,480],[640,0]])
+        M = cv2.getPerspectiveTransform(pts1,pts2)
+        dst = cv2.warpPerspective(frame,M,(640,480))
+        return dst
     else:
         pts1 = np.float32([[5,5],[5,475],[640,480],[640,0]])
         pts2 = np.float32([[0,0],[0,480],[640,480],[640,0]])

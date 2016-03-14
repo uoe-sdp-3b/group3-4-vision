@@ -25,7 +25,7 @@ class Camera(object):
         if self.test == 0:
             frame = step(frame, self.pitch)
         elif self.test == 1:
-            frame = cv2.imread('pitch0.png')
+            frame = cv2.imread('pitch1.png')
 
         return frame
 
