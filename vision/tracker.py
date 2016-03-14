@@ -327,7 +327,7 @@ class RobotTracker(Tracker):
             estimated_locations[key] = position_key
 
 
-        self.previous_locations[key].insert(estimated_locations)
+        self.previous_locations[key].insert(estimated_locations[key])
         return estimated_locations
 
 
