@@ -128,11 +128,10 @@ def main():
 
             if (orientation is not None):
                 v, a = orientation
-                v.rescale(100)
                 x, y = center
                 if v is not None:
 
-                    draw_vector = (x + v.x, y + v.y)
+                    draw_vector = (x + v[0], y + v[1])
                 else:
                     draw_vector = (0, 0)
 
@@ -141,6 +140,7 @@ def main():
                         (int(draw_vector[0]), int(draw_vector[1])), (0, 0, 255), 2)
 
         tmp = robots_all.copy()
+        #tmp = {}
         tmp.update({"ball_center": ball_center})
         socket.send_pyobj(tmp)
 
