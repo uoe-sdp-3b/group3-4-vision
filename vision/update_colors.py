@@ -6,21 +6,21 @@ sliders = {'H low':['min',0,180],
             'S low':['min',1,255],
             'V low':['min',2,255]}
 
-redSliders = {'red' :{'H low red ':['min',0,180],
+redSliders = {'red' :{'H low red':['min',0,180],
                     'H high red':['max',0,180],
                     'S low red':['min',1,255],
                     'V low red':['min',2,255]
                     },
                 'maroon' : {
-                    'H low  maroon':['min',0,180],
+                    'H low maroon':['min',0,180],
                     'H high maroon':['max',0,180],
                     'S low maroon':['min',1,255],
                     'V low maroon':['min',2,255]
                 }
             }  
 keys = ['H low','H high', 'S low', 'V low']
-redKeys = ['H low red ','H high red','S low red','V low red']
-meroonKeys = ['H low maroon ','H high maroon','S low maroon','V low maroon']               
+redKeys = ['H low red','H high red','S low red','V low red']
+maroonKeys = ['H low maroon','H high maroon','S low maroon','V low maroon']               
 
 def nothing(x):
     pass                
