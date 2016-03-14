@@ -2,6 +2,7 @@ import math
 import numpy as np
 from vector import Vector
 from array_queue import ArrayQueue
+from numpy.linalg import inv
 
 def distance(point_1, point_2):
 
