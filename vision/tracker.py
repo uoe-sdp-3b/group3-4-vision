@@ -182,8 +182,7 @@ class RobotTracker(Tracker):
 
         for i in range(l):
 
-            if bucket_counter == 5:
-                bucket_counter = 4
+            if bucket_counter == 4:
                 break
 
             if processed[i]:
