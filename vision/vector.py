@@ -46,7 +46,9 @@ class Vector():
     def angleBetween(v1, v2):
 
         dot_prod = Vector.dotProduct(v1, v2)
+        print "Dot product: ", dot_prod
         cos_alpha = dot_prod / (v1.magnitude() * v2.magnitude())
+        print "Cos alpha: ", cos_alpha
         alpha = math.acos(cos_alpha)
 
         return math.degrees(alpha)
