@@ -51,6 +51,7 @@ def linear_regression(points_queue):
     for i in range(1, num_pts):
         print points[i]
         np.append(M, [points[i]], axis=0)
+        print M
 
     xc = M[:, [0]]
     print "Xc --------->", xc
