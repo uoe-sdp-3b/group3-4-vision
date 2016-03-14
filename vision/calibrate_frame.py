@@ -55,7 +55,7 @@ def warp(frame,pitch=0):
     if pitch == 0: 
         return frame
     else:
-        M = cv2.getRotationMatrix2D((COLS/2, ROWS/2), 1, 1)
+        M = cv2.getRotationMatrix2D((COLS/2, ROWS/2), 0, 1)
         return cv2.warpAffine(frame, M, (COLS, ROWS))
 
 def perspective(frame, pitch=0):

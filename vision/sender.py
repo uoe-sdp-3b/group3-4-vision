@@ -40,7 +40,7 @@ def main():
     socket.bind("tcp://*:5555")
 
     args = parse_args()
-    c = Camera(int(args.p), 0, 1)
+    c = Camera(int(args.p), 0, 0)
 
     frame = c.get_frame()
 
@@ -58,7 +58,7 @@ def main():
     colors = {}
     colors['red'] = (0, 0, 255)
     colors['blue'] = (255, 0, 0)
-    
+
     keys = {'b':'blue',
             'c':'bright_blue',
             'g':'green',
@@ -88,7 +88,7 @@ def main():
                 data[col] = new_data[col]
 
         elif k == 27:
-            break            
+            break
 
         # get robot orientations and centers, also get ball coordinates
         robots_all = None
@@ -96,6 +96,7 @@ def main():
         try:
             ball_center = ball_tracker.getBallCoordinates(frame)
             robots_all = robot_tracker.getRobotParameters(frame)
+            print ball_center
             # print robots_all
         except ValueError:
             print("Exception calculating ball")

@@ -37,6 +37,7 @@ class WorldApi():
         socket.connect(self.target)
 
         while not self.thread_close:
+            print "Enter"
             obj = None
             try:
                 obj = socket.recv_pyobj()
@@ -46,6 +47,7 @@ class WorldApi():
             if obj is not None:
                 self.thread_ready = True
                 self.world = obj
+                print obj
 
         socket.close()
         log.debug("Thread Closed")
