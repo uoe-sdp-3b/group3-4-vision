@@ -51,8 +51,6 @@ def get_colors(filename=PATH+'/config/colors.json'):
     json_content = get_json(filename)
     machine_name = socket.gethostname().split('.')[0]
 
-    print "Adjusting settings for: " + machine_name
-
     if machine_name in json_content:
         current = json_content[machine_name]
     else:
