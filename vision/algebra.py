@@ -38,8 +38,12 @@ def transformCoordstoCV( (x, y) ) :
 def linear_regression(points_queue):
 
     points = points_queue.iteritems()
+
+    if None in points:
+        return None # Might need revisiting 
+
     if distance(points[0], meanPoint(points)) < 10:
-        return [0, 0]
+        return Vector(0, 0)
 
     num_pts = len(points)
     M = [points[0]]
