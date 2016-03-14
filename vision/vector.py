@@ -29,6 +29,9 @@ class Vector():
         self.x = self.x * desired_magnitude / mag_tmp
         self.y = self.y * desired_magnitude / mag_tmp
 
+    def isZero(self):
+        return self.x == 0 and self.y == 0
+
     def copy(self):
         return Vector(self.x, self.y)
 

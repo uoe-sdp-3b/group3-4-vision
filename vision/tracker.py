@@ -59,7 +59,7 @@ class Tracker():
         real_contours = []
         for contour in contours:
             _, radius = cv2.minEnclosingCircle(contour)
-            if radius > 1.3 and radius < 20:
+            if radius > 1.3 and radius < 15:
                 real_contours.append(contour)
 
         return real_contours
@@ -317,7 +317,8 @@ class RobotTracker(Tracker):
                 estimated_locations[key] = None
                 continue
 
-            trajectory_vector.rescale(1)
+            if not trajectory_vector.isZero():
+                trajectory_vector.rescale(1)
             speed = self.getSpeed(key)
             dislocation = Vector.scalarMultiple(trajectory_vector, speed)
 
