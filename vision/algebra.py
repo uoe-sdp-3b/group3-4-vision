@@ -38,6 +38,7 @@ def transformCoordstoCV( (x, y) ) :
 def linear_regression(points_queue):
 
     points = points_queue.iteritems()
+    print "Points -----> ", points
 
     if None in points:
         return None # Might need revisiting 

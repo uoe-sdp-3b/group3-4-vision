@@ -434,7 +434,7 @@ class RobotTracker(Tracker):
 
     def findBucket(self, buckets, bucket_classifications, key, numbuckets):
 
-        print bucket_classifications
+        # print bucket_classifications
         if bucket_classifications is None:
             return -1
         # real_classification_tmp = [ (self.color_map[x], y) for (x,y) in bucket_classifications ]
