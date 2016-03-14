@@ -154,14 +154,13 @@ class RobotTracker(Tracker):
     def groupContours(self,contour_list):
 
         buckets = []
-        for i in range(4):
-            buckets.append([])
 
         l = len(contour_list)
         processed = [False] * l
 
         bucket_counter = 0
         for i in range(l):
+            buckets.append([])
             center, color = contour_list[i]
             if color in self.side_identifiers:
                 buckets[bucket_counter].append( (center, color) )
@@ -182,8 +181,7 @@ class RobotTracker(Tracker):
 
         for i in range(l):
 
-            if bucket_counter == 4:
-                break
+            buckets.append([])
 
             if processed[i]:
                 continue
@@ -202,6 +200,10 @@ class RobotTracker(Tracker):
                     buckets[bucket_counter].append( (support_center, support_color) )
                     processed[j] = True
 
+                if len(buckets[bucket_counter]) > 5:
+                    buckets[bucket_counter] = []
+                    bucket_counter -= 1
+
             bucket_counter += 1
 
         return (buckets, bucket_counter)
@@ -212,13 +214,16 @@ class RobotTracker(Tracker):
         possibilities = [combinations] * 4
 
         # print combinations
-        bucket_classifications = [None] * 4
+        num_buckets = len(buckets)
+        bucket_classifications = [None] * num_buckets
+
+        classifications_done = 0
 
         # Elimination of bad classifications
         changed = True
-        while changed:
+        while changed and classifications_done < 4:
             changed = False
-            for i in range(4):
+            for i in range(num_buckets):
                 num = {}
                 for color in self.all_colors:
                     num[color] = len([x for (_, x) in buckets[i] if x == color])
@@ -234,7 +239,7 @@ class RobotTracker(Tracker):
                         possibilities[i] = [ (a,b) for (a,b) in possibilities[i] if b != opposing_col ]
 
 
-            for i in range(4):
+            for i in range(num_buckets):
                 if bucket_classifications[i] is not None:
                     continue
 
@@ -245,6 +250,7 @@ class RobotTracker(Tracker):
                     # This is the case that we want
                     classification = possibilities[i][0]
                     bucket_classifications[i] = classification
+                    classifications_done += 1
                     for j in range(4):
                         possibilities[j] = [x for x in possibilities[j] if x != classification]
 
@@ -419,10 +425,8 @@ class RobotTracker(Tracker):
             else:
                 final_vector = support_orientation_vector
 
-            # final_vector = support_orientation_vector
-            # final_vector.rotate(180)
             self.updateOrientations(estimated_orientations, final_vector, key)
-
+            self.previous_orientations[key].insert(final_vector)
 
         return estimated_orientations
 
