@@ -122,7 +122,7 @@ class BallTracker(Tracker):
             return None
         ball_contour = self.getBiggestContour(contours)
 
-        return transformCoordstoDecartes(self.getContourCenter(ball_contour))
+        return self.getContourCenter(ball_contour)
 
 
 class RobotTracker(Tracker):
