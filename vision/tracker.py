@@ -460,11 +460,12 @@ class RobotTracker(Tracker):
             estimated_orientations[key] = None
             return
 
+        v.switchCoords()
         tmp = v.toPoint()
-        tmp = transformCoordstoDecartes( tmp )
         angle_radians = np.arctan2(tmp[1], tmp[0])
         angle_degrees = math.degrees(angle_radians)
 
+        v.switchCoords()
         v.rescale(50)
         estimated_orientations[key] = v.toPoint(), angle_degrees
 
