@@ -40,12 +40,12 @@ def denoiseMask(mask):
 gets pixel value from img on coordinates (x, y)
 '''
 def getPixelValue(img, x, y):
-    # return pixel value at (x,y): [B,G,R] 
+    # return pixel value at (x,y): [B,G,R]
     print img[x,y]
     return img[x,y]
 
 '''
-takes the list of list (aka BGR values of all dots) 
+takes the list of list (aka BGR values of all dots)
 and returns average
 '''
 def averageValue(array):
@@ -53,7 +53,7 @@ def averageValue(array):
     for item in array:
         b += item[0]
         g += item[1]
-        r += item[2]  
+        r += item[2]
     return math.floor(b/len(array)), math.floor(g/len(array)), math.floor(r/len(array))
 
 '''
@@ -80,19 +80,19 @@ def getColorValues(event,x,y,flags,param):
         if color == 'blue':
             bgr['blue'].append(getPixelValue(img, y, x).tolist())
             circle_coords.append((x,y))
-               
+
         elif color == 'bright_blue':
-            bgr['bright_blue'].append(getPixelValue(img, y, x).tolist()) 
+            bgr['bright_blue'].append(getPixelValue(img, y, x).tolist())
             circle_coords.append((x,y))
 
         elif color == 'pink':
             bgr['pink'].append(getPixelValue(img, y, x).tolist())
             circle_coords.append((x,y))
-                
+
         elif color == 'green':
             bgr['green'].append(getPixelValue(img, y, x).tolist())
             circle_coords.append((x,y))
-                
+
         elif color == 'yellow':
             bgr['yellow'].append(getPixelValue(img, y, x).tolist())
             circle_coords.append((x,y))
@@ -101,7 +101,7 @@ def getColorValues(event,x,y,flags,param):
 '''
 getThresholds() automatically thresholds colors only by clicking on the current feed
 Function returns 'hsv_range' - dictionary that contains all needed thresholds
-for these colors: red, maroon, green (aka bright_green), pink, yellow, blue and light_blue
+for these colors: red, maroon, green (aka bright_green), pink, yellow, blue and bright_blue
 '''
 def getThresholds(pitch):
     global color
@@ -109,7 +109,7 @@ def getThresholds(pitch):
     hsv_range = {}
     hsv_range['red'] = ( np.array([0, 150, 150]), np.array([5, 255, 255]) )
     hsv_range['maroon'] = ( np.array([175, 150, 150]), np.array([180, 255, 255]) )
-    
+
     print "What colours do you want to calibrate?"
     print "Click once on the image after pressing the following: \n 'b' -> blue \n 'c' -> bright_blue \n 'p' -> pink \n 'g' -> green \n 'y' -> yellow"
     print "If you want to redo, click corresponding color character agian."
@@ -127,9 +127,9 @@ def getThresholds(pitch):
             bgr['blue'] = []
             color = 'blue'
         elif k == ord('c'):
-            print "Click on BRIGHT BLUE" 
-            bgr['bright_blue'] = []           
-            color = 'bright_blue'  
+            print "Click on BRIGHT BLUE"
+            bgr['bright_blue'] = []
+            color = 'bright_blue'
         elif k == ord('p'):
             print "Click on PINK"
             bgr['pink'] = []
@@ -141,11 +141,11 @@ def getThresholds(pitch):
         elif k == ord('y'):
             print "Click on YELLOW"
             bgr['yellow'] = []
-            color = 'yellow'                 
+            color = 'yellow'
         elif k == 27:
             break
 
-    print "Destroying all windows"        
+    print "Destroying all windows"
     cv2.destroyAllWindows()
     c.close()
     print "Averaging BGR values..."
@@ -154,7 +154,7 @@ def getThresholds(pitch):
             h = getHueValue(averageValue(bgr[colors]))
             value = h[0][0][0]
             hsv_range[colors] = ( np.array([value-10, 140, 140]), np.array([value+10, 255, 255]) )
-    return hsv_range        
+    return hsv_range
 
 '''
 uses GUI sliding trackbars to calibrate thresholds
@@ -168,7 +168,7 @@ def calibrateThresholds(pitch):
     c = Camera(pitch)
 
     for colors in thresholds:
-        if colors != 'red' and colors != 'maroon': 
+        if colors != 'red' and colors != 'maroon':
             cv2.namedWindow(colors)
             print "Will be calibrating: "+colors
 
@@ -195,17 +195,17 @@ def calibrateThresholds(pitch):
                 # show mask and an actual picture for comparison
                 cv2.imshow(colors, denoiseMask(mask))
                 cv2.imshow('actual feed', frame)
-                    
+
                 calibrated_thresholds[colors] = {'min': np.array([h_low, s_low, v_low]),'max': np.array([h_high, 255, 255]) }
 
                 k = cv2.waitKey(1) & 0xFF
                 if k == 27:
-                    break  
+                    break
 
             print colors + " was calibrated"
 
     print "Now RED will be calibrated which takes two different color ranges"
-                          
+
     cv2.namedWindow('red')
     h_low_red_init = thresholds['red'][0][0]
     h_high_red_init = thresholds['red'][1][0]
@@ -228,7 +228,7 @@ def calibrateThresholds(pitch):
     cv2.createTrackbar('V low maroon','red',v_low_maroon_init,255,nothing)
 
     while(1):
-                
+
         # get current positions of six trackbars
         h_low_red = cv2.getTrackbarPos('H low red','red')
         h_high_red = cv2.getTrackbarPos('H high red','red')
@@ -250,13 +250,13 @@ def calibrateThresholds(pitch):
 
         cv2.imshow('red', denoiseMask(mask))
         cv2.imshow('actual feed', frame)
-                    
+
         calibrated_thresholds['red'] = {'min': np.array([h_low_red, s_low_red, v_low_red]), 'max': np.array([h_high_red, 255, 255]) }
         calibrated_thresholds['maroon'] = {'min': np.array([h_low_maroon, s_low_maroon, v_low_maroon]),'max': np.array([h_high_maroon, 255, 255]) }
 
         k = cv2.waitKey(1) & 0xFF
         if k == 27:
-            break 
+            break
 
     cv2.destroyAllWindows()
     c.close()

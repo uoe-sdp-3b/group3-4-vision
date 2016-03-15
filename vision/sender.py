@@ -12,7 +12,7 @@ def parse_args():
     parser.add_argument("-t",
                         help="Our Team Colour",
                         required=True,
-                        choices=["yellow", "light_blue"])
+                        choices=["yellow", "bright_blue"])
     '''parser.add_argument("-d",
                         help="Number of dots",
                         required=True,
@@ -39,7 +39,7 @@ def main():
 
     colors = {}
     colors['yellow'] = (0, 255, 255)
-    colors['light_blue'] = (255, 255, 0)
+    colors['bright_blue'] = (255, 255, 0)
     colors['pink'] = (127, 0, 255)
     colors['green'] = (0, 255, 0)
     colors['red'] = (0, 0, 255)
@@ -57,7 +57,7 @@ def main():
     # convert string colors into GBR
     '''our_circle_color = colors[our_team_color]
     if our_team_color == 'yellow':
-        opponent_circle_color = colors['light_blue']
+        opponent_circle_color = colors['bright_blue']
     else:
         opponent_circle_color = colors['yellow']'''
 
@@ -76,21 +76,21 @@ def main():
         mate_letters = 'GREEN'
         mate_col = colors['green']
         our_mate_color = 'green_robot'''
-    
+
     keys = {'b':'blue',
         'c':'bright_blue',
         'g':'green',
         'p':'pink',
         'r':'red',
-        'y':'yellow'} 
-    
-    previously_pressed = ''  
-    data = get_colors() 
-    
+        'y':'yellow'}
+
+    previously_pressed = ''
+    data = get_colors()
+
     # main feed controller:
     while True:
         frame = c.get_frame()
-        
+
         k = cv2.waitKey(5) & 0xFF
         if k == 27:
             break
@@ -105,7 +105,7 @@ def main():
 
         elif not not previously_pressed:
             new_data = recordValues(keys[previously_pressed], frame)
-            if data is not None:    
+            if data is not None:
                 for col in new_data:
                     data[col] = new_data[col]
 

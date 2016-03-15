@@ -8,13 +8,13 @@ from tracker import *
 
 colors = {}
 colors['yellow'] = (0,255,255)
-colors['light_blue'] = (255,255,0)
+colors['bright_blue'] = (255,255,0)
 colors['pink'] = (127,0,255)
 colors['green'] = (0,255,0)
 colors['red'] = (0,0,255)
 colors['blue'] = (255,0,0)
 
-print "\nPossible team colors: yellow/light_blue\n"
+print "\nPossible team colors: yellow/bright_blue\n"
 our_team_color = raw_input("Specify your team colour: ")
 num_of_pink = raw_input("Specify the number of pink dots on your robot: ")
 ball_color = raw_input("Specify ball color: ")
@@ -25,12 +25,12 @@ if int(num_of_pink) == 1:
 	our_robot_color = 'green_robot'
 	mate_letters = 'PINK'
 	mate_col = colors['pink']
-	our_mate_color = 'pink_robot' 
+	our_mate_color = 'pink_robot'
 else:
 	our_letters = 'PINK'
 	our_col = colors['pink']
-	our_robot_color = 'pink_robot' 
-	mate_letters = 'GREEN' 
+	our_robot_color = 'pink_robot'
+	mate_letters = 'GREEN'
 	mate_col = colors['green']
 	our_mate_color = 'green_robot'
 
