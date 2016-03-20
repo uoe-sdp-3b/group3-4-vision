@@ -20,6 +20,9 @@ class WorldApi():
         self.thread_ready = False
         self.client_thread = Thread(target=self.client)
         self.client_thread.start()
+        while not self.ready():
+            continue
+        print "Api ready to use!"
 
     def close(self):
         """
@@ -57,3 +60,13 @@ class WorldApi():
         whether the world api is ready yet
         """
         return self.thread_ready
+
+
+    def getMyPosition():
+        return self.world[('ally', 'me')]['center']
+
+    def getAllyPosition():
+        return self.world[('ally', 'friend')]['center']
+
+    def getEnemyPositions():
+        return [self.world[('enemy', 'green')]['center'], self.world[('enemy', 'pink')]['center']]
