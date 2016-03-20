@@ -70,3 +70,12 @@ class WorldApi():
 
     def getEnemyPositions():
         return [self.world[('enemy', 'green')]['center'], self.world[('enemy', 'pink')]['center']]
+
+    def getMyOrientation():
+        return self.world[('ally', 'me')]['orientation']
+
+    def getAllyOrientation():
+        return self.world[('ally', 'friend')]['orientation']
+
+    def getEnemyOrientation():
+        return [self.world[('enemy', 'green')]['orientation'], self.world[('enemy', 'pink')]['orientation']]
