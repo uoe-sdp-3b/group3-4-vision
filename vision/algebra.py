@@ -39,7 +39,7 @@ def transformCoordstoCV( (x, y) ) :
 def linear_regression(points_queue):
 
     points = points_queue.iteritems()
-    print "Points -----> ", points
+    #print "Points -----> ", points
 
     if None in points:
         return None # Might need revisiting 
@@ -59,10 +59,10 @@ def linear_regression(points_queue):
 
     descartes_points = [ transformCoordstoDecartes(x) for x in points ]
     M = np.array( [[a, b] for (a, b) in descartes_points] )
-
-    xc = M[:, 0]
+    print  "M ---------->", M
+    xc = M[:, [0]]
     print "Xc --------->", xc
-    yc = M[:, 1]
+    yc = M[:, [1]]
     print "Yc --------->", yc
     ones = np.ones((num_pts, 1))
     X = np.concatenate((ones, xc), axis=1)

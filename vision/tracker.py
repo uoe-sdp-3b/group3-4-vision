@@ -148,20 +148,25 @@ class RobotTracker(Tracker):
         self.color_map[self.opposingColor(me_color)] = 'friend'
 
 
-    def opposingColor(c):
+    def opposingColor(self, c):
         opposing_color = {'yellow':'bright_blue', 'bright_blue':'yellow',
                           'pink':'green', 'green':'pink'}
         return opposing_color[c]
 
     def mapColorToRealClassification(self, (s, r)):
 
-        return (self.color_map(s), self.color_map(r))
+        return (self.color_map[s], self.color_map[r])
 
 
     def colorCombinations(self):
 
         combinations = [(x, y) for x in self.side_identifiers for y in self.robot_identifiers]
         return combinations
+
+    def identifierCombinations(self):
+        combs = self.colorCombinations()
+        real_combs = [ self.mapColorToRealClassification(x) for x in combs ]
+        return real_combs
 
     def groupContours(self,contour_list):
 
@@ -175,6 +180,7 @@ class RobotTracker(Tracker):
             bucket_tmp = []
             center, color = contour_list[i]
             if color in self.side_identifiers:
+                print "Enter"
                 bucket_tmp.append( (center, color) )
                 processed[i] = True
                 for j in range(l):
@@ -188,6 +194,8 @@ class RobotTracker(Tracker):
                     if dist < 20 * 20:
                         bucket_tmp.append( (support_center, support_color) )
                         processed[j] = True
+
+                buckets.append(bucket_tmp)
 
 
         for i in range(l):
@@ -210,8 +218,8 @@ class RobotTracker(Tracker):
                     bucket_tmp.append( (support_center, support_color) )
                     processed[j] = True
 
-                if len(bucket_tmp) <= 5:
-                    buckets.append(bucket_tmp)
+                #if len(bucket_tmp) <= 5:
+            buckets.append(bucket_tmp)
 
 
         return (buckets, len(buckets))
@@ -219,6 +227,7 @@ class RobotTracker(Tracker):
 
     def classifyBuckets(self, buckets):
 
+        combinations = self.colorCombinations()
         # print combinations
         num_buckets = len(buckets)
         possibilities = [combinations] * num_buckets
@@ -301,11 +310,11 @@ class RobotTracker(Tracker):
             points = [x for (x, _) in bucket]
             return meanPoint(points)
 
-        if not self.previous_locations[key].full():
+        if not self.previous_locations[robot_classification].full():
             return None
 
         ''' Get the ArrayQueue(previous locations) for robot with the 'key' identifier '''
-        points_queue = self.previous_locations[key]
+        points_queue = self.previous_locations[robot_classification]
         trajectory_vector = linear_regression(points_queue)
 
         if trajectory_vector is None:
@@ -351,7 +360,7 @@ class RobotTracker(Tracker):
                 estimated_orientations[key] = None
                 continue
             side_color, main_color = key
-            support_color = self.opposing_color[main_color]
+            support_color = self.opposingColor(main_color)
 
 
             support_orientation_vector = None
@@ -367,7 +376,8 @@ class RobotTracker(Tracker):
             #     continue
 
             bucket_key = bucket_classifications[key]
-            if bucket is None:
+            if bucket_key is None:
+                print "takes previous vector"
                 final_vector = support_orientation_vector
                 self.updateOrientations(estimated_orientations, final_vector, key)
                 continue
@@ -375,6 +385,7 @@ class RobotTracker(Tracker):
 
             for bucket_center, bucket_color in bucket_key:
                 if bucket_color == support_color:
+                    print "ENTER--------------"
                     support_orientation_vector = Vector.getDirectionVector( bucket_center, center, 1 )
                     support_orientation_vector.rotate(math.radians(215))
 
@@ -383,7 +394,7 @@ class RobotTracker(Tracker):
                 self.updateOrientations(estimated_orientations, final_vector, key)
                 continue
 
-            centers_main_color = [ x for (x, c) in buckets[bucket_index] if c == main_color ]
+            centers_main_color = [ x for (x, c) in bucket_key if c == main_color ]
             centers_len = len(centers_main_color)
 
             midpoints_main_color = []
@@ -471,7 +482,9 @@ class RobotTracker(Tracker):
 
         all_contours = self.getMultiColorContours(frame, self.all_colors)
         buckets, bucket_counter = self.groupContours(all_contours)
-        # print "Bucket counter: ", bucket_counter
+        print "Bucket counter: ", bucket_counter
+        for bucket in buckets:
+            print "Bucket -----> ", bucket
         # print "Buckets: "
         # for i in range(4):
         #     print "Bucket ----> ", i
@@ -480,7 +493,7 @@ class RobotTracker(Tracker):
         #     print bucket
 
         bucket_classifications = self.classifyBuckets(buckets)
-        estimated_locations = self.estimatePositions(buckets, bucket_classifications, bucket_counter)
+        estimated_locations = self.estimatePositions(bucket_classifications)
         estimated_orientations = self.estimateOrientations(bucket_classifications, estimated_locations)
 
         # print "Classifications: ", bucket_classifications
@@ -494,6 +507,7 @@ class RobotTracker(Tracker):
             robots_all[real_key] = {}
 
         for key in self.colorCombinations():
+            real_key = self.mapColorToRealClassification(key)
             robots_all[real_key]['center'] = estimated_locations[key]
             robots_all[real_key]['orientation'] = estimated_orientations[key]
 

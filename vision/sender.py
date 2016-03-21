@@ -27,6 +27,10 @@ def parse_args():
                         help="Pitch number",
                         required=True,
                         choices=["0","1"])
+    parser.add_argument("-m",
+                        help = "My Robot Colour",
+                        required=True,
+                        choices = ['green', 'pink'])
 
     #parser.add_argument("-c", help="Computer Name (useful for testing)")
 
@@ -47,10 +51,11 @@ def main():
     our_team_color = args.t
     #num_of_pink = args.d
     ball_color = args.b
+    my_color = args.m
     #print("(%s, %s, %s)" % (our_team_color, num_of_pink, ball_color))
 
     # create our robot as object:
-    robot_tracker = RobotTracker(our_team_color)
+    robot_tracker = RobotTracker(our_team_color, my_color, 10)
     ball_tracker = BallTracker(ball_color)
 
     # convert string colors into GBR
@@ -103,7 +108,7 @@ def main():
             raise
 
         if ball_center is not None:
-            _ball = transformCoordstoCV(ball_center)
+            _ball = ball_center
             cv2.circle(frame, (int(_ball[0]), int(_ball[1])), 7,
                        colors[ball_color], 2)
             cv2.putText(frame, 'BALL',

@@ -1,0 +1,26 @@
+import numpy as np
+import cv2
+from matplotlib import pyplot as plt
+import sys
+#sys.path.insert(0, '../')
+from camera import Camera
+from calibrate import step
+import math
+
+c = Camera()
+
+frame = c.get_frame()
+
+b,g,r = cv2.split(frame)           # get b,g,r
+rgb_img = cv2.merge([r,g,b])     # switch it to rgb
+
+# Denoising (src, dst, filter_strength, twmplate_window_size, search_window_size) 
+dst = cv2.fastNlMeansDenoisingColored(frame,None,5,10,7,21)
+
+b,g,r = cv2.split(dst)           # get b,g,r
+rgb_dst = cv2.merge([r,g,b])     # switch it to rgb
+
+plt.subplot(211),plt.imshow(rgb_img)
+plt.subplot(212),plt.imshow(rgb_dst)
+plt.show()
+c.close()
