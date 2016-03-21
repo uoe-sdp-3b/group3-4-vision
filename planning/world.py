@@ -40,7 +40,6 @@ class WorldApi():
         socket.connect(self.target)
 
         while not self.thread_close:
-            print "Enter"
             obj = None
             try:
                 obj = socket.recv_pyobj()
@@ -79,3 +78,9 @@ class WorldApi():
 
     def getEnemyOrientation(self):
         return [self.world[('enemy', 'friend')]['orientation'], self.world[('enemy', 'me')]['orientation']]
+
+    def getBallCenter(self):
+        return self.world['ball_center']    
+
+    def getEverything(self):
+        return self.world    
