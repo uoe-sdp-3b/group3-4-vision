@@ -50,7 +50,7 @@ class WorldApi():
             if obj is not None:
                 self.thread_ready = True
                 self.world = obj
-                print obj
+                #print obj
 
         socket.close()
         log.debug("Thread Closed")
@@ -62,20 +62,20 @@ class WorldApi():
         return self.thread_ready
 
 
-    def getMyPosition():
+    def getMyPosition(self):
         return self.world[('ally', 'me')]['center']
 
-    def getAllyPosition():
+    def getAllyPosition(self):
         return self.world[('ally', 'friend')]['center']
 
-    def getEnemyPositions():
-        return [self.world[('enemy', 'green')]['center'], self.world[('enemy', 'pink')]['center']]
+    def getEnemyPositions(self):
+        return [self.world[('enemy', 'friend')]['center'], self.world[('enemy', 'me')]['center']]
 
-    def getMyOrientation():
+    def getMyOrientation(self):
         return self.world[('ally', 'me')]['orientation']
 
-    def getAllyOrientation():
+    def getAllyOrientation(self):
         return self.world[('ally', 'friend')]['orientation']
 
-    def getEnemyOrientation():
-        return [self.world[('enemy', 'green')]['orientation'], self.world[('enemy', 'pink')]['orientation']]
+    def getEnemyOrientation(self):
+        return [self.world[('enemy', 'friend')]['orientation'], self.world[('enemy', 'me')]['orientation']]

@@ -46,7 +46,7 @@ def linear_regression(points_queue):
 
     points = list(set(points))
 
-    if distance(points[0], meanPoint(points)) < 50:
+    if distance(points[0], meanPoint(points)) < 200:
         return Vector(0, 0)
 
     num_pts = len(points)
