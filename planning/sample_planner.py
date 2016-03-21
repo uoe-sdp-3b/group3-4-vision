@@ -8,18 +8,34 @@ class Planner:
         api = WorldApi()
 
         try:
-            
+            i = 0
             while True:
-                print "My position: ", api.getMyPosition()
-                print "Friend position: ", api.getAllyPosition()
-                print "Enemy positions: ", api.getEnemyPositions()
-                print "My angle: ", api.getMyOrientation()[1]
-                print "Mate angle: ", api.getAllyOrientation()[1]
-                #rint "Enemy "api.getEnemyOrientation()
-                print "Angles_0-> ", api.getEnemyOrientation()[0][1]
-                print "Angles_1-> ", api.getEnemyOrientation()[1][1]
+                print 40*"-"
+                if api.getMyPosition() is not None:
+                    print "My Position: ", api.getMyPosition()
+                    print "My Angle: ", api.getMyOrientation()[1]
+                else :    
+                    print "My Position: ", api.getMyPosition()
 
-            
+                if api.getAllyPosition() is not None:    
+                    print "Friend Position: ", api.getAllyPosition()
+                    print "Friend Angle: ", api.getAllyOrientation()[1]
+                else:
+                    print "Friend Position: ", api.getAllyPosition()
+
+                if api.getEnemyPositions()[0] is not None:
+                    print "Enemy_0 Position: ", api.getEnemyPositions()[0]
+                    print "Enemy_0 Angle: ", api.getEnemyOrientation()[0][1]
+                else:
+                    print "Enemy_0 Position: ", api.getEnemyPositions()[0]
+
+                if api.getEnemyPositions()[1] is not None:
+                    print "Enemy_0 Position: ", api.getEnemyPositions()[1]
+                    print "Enemy_0 Angle: ", api.getEnemyOrientation()[1][1]
+                else:
+                    print "Enemy_0 Position: ", api.getEnemyPositions()[1]    
+
+                print "Ball Center: ", api.getBallCenter()
         finally:
         # This needs to be run on both a clean or unclean exit. otherwise your threads won't close gracefully
             api.close()
