@@ -31,6 +31,10 @@ def parse_args():
                         help = "My Robot Colour",
                         required=True,
                         choices = ['green', 'pink'])
+    parser.add_argument("-test",
+                        help = "Are you using live video feed?",
+                        required=True,
+                        choices = ['0', '1'])
 
     #parser.add_argument("-c", help="Computer Name (useful for testing)")
 
@@ -44,7 +48,8 @@ def main():
     socket.bind("tcp://*:5555")
 
     args = parse_args()
-    c = Camera(int(args.p), 0, 0)
+    testing = int(args.test)
+    c = Camera(int(args.p), 0, testing)
 
     frame = c.get_frame()
 
