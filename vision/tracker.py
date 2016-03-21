@@ -180,7 +180,7 @@ class RobotTracker(Tracker):
             bucket_tmp = []
             center, color = contour_list[i]
             if color in self.side_identifiers:
-                print "Enter"
+                #print "Enter"
                 bucket_tmp.append( (center, color) )
                 processed[i] = True
                 for j in range(l):
@@ -377,7 +377,7 @@ class RobotTracker(Tracker):
 
             bucket_key = bucket_classifications[key]
             if bucket_key is None:
-                print "takes previous vector"
+                #print "takes previous vector"
                 final_vector = support_orientation_vector
                 self.updateOrientations(estimated_orientations, final_vector, key)
                 continue
@@ -385,7 +385,7 @@ class RobotTracker(Tracker):
 
             for bucket_center, bucket_color in bucket_key:
                 if bucket_color == support_color:
-                    print "ENTER--------------"
+                    #print "ENTER--------------"
                     support_orientation_vector = Vector.getDirectionVector( bucket_center, center, 1 )
                     support_orientation_vector.rotate(math.radians(215))
 
