@@ -27,7 +27,14 @@ denoises mask, so that colors will not flicker
 '''
 def parseArgs():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", help="Pitch number", required=True, choices=["0", "1"])
+    parser.add_argument("-p",
+                        help="Pitch number", 
+                        required=True, 
+                        choices=["0", "1"])
+    parser.add_argument("-t",
+                        help="Reading picture or live camera feed?",
+                        required=True,
+                        choices=["0", "1"])
     return parser.parse_args()
 
 def denoiseMask(mask):
@@ -159,10 +166,10 @@ def getThresholds(pitch, camera):
 uses GUI sliding trackbars to calibrate thresholds
 and returns dictionary with calibrated thresholds
 '''
-def calibrateThresholds(pitch):
+def calibrateThresholds(pitch, test=0):
 
     # keys: blue, pink, maroon, green, yellow, bright_blue, red
-    c = Camera(pitch, 0, 0)
+    c = Camera(pitch, 0, test)
     thresholds = getThresholds(pitch, c)
     calibrated_thresholds = {}
     
@@ -265,7 +272,8 @@ def calibrateThresholds(pitch):
 if __name__ == "__main__":
     args = parseArgs()
     pitch = int(args.p)
-    data = calibrateThresholds(pitch)
+    test = int(args.t)
+    data = calibrateThresholds(pitch, test)
     print data
     save_colors(data)
     print "---CALIBRATION DONE------"
