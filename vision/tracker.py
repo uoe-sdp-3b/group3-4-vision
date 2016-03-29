@@ -282,16 +282,6 @@ class RobotTracker(Tracker):
         return meanPoint(points)
 
 
-    def calculateLocation(self, classification, bucket):
-
-        # Can only happen if >= 2 contours in the bucket
-
-        for center, color in bucket:
-            if color in self.side_identifiers:
-                return center
-
-        return self.gradientDescent(bucket)
-
 
     def estimatePositions(self, bucket_classifications):
 
@@ -302,6 +292,12 @@ class RobotTracker(Tracker):
             self.previous_locations[c].insert(estimated_locations[c])
 
         return estimated_locations
+
+
+    def outOfBounds(self, (x, y)):
+
+        return not (0 <= x and x <= 640 and 0 <= y and y <= 480)
+
 
     def calculateLocation(self, robot_classification, bucket):
 
@@ -326,6 +322,8 @@ class RobotTracker(Tracker):
 
         prev_location = points_queue.getLeft()
         estimated_robot_position = Vector.addToPoint( prev_location, dislocation )
+        if self.outOfBounds(estimated_robot_position):
+            return None
 
         return estimated_robot_position
 
